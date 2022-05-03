@@ -12,24 +12,24 @@
         android:layout_height="0dp"
         android:layout_marginEnd="20dp"
         android:minHeight="48dp"
-        android:text="Connect"
+        android:text="@string/connectLabel"
         android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="@+id/textInputLayout3"
+        app:layout_constraintBottom_toBottomOf="@+id/serverIPportInputView"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/textInputLayout3" />
+        app:layout_constraintTop_toTopOf="@+id/serverIPportInputView" />
 
     <WebView
-        android:id="@+id/webViewControl"
+        android:id="@+id/webControlView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="200dp"
+        android:layout_marginTop="300dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" >
+        app:layout_constraintTop_toTopOf="parent">
 
     </WebView>
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/textInputLayout3"
+        android:id="@+id/serverIPportInputView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
@@ -48,7 +48,7 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <EditText
-        android:id="@+id/editTextTextPersonName4"
+        android:id="@+id/reastreamLabelInputView"
         android:layout_width="0dp"
         android:layout_height="54dp"
         android:layout_marginTop="16dp"
@@ -58,22 +58,21 @@
         android:text="@string/reastream_identifier_label"
         app:layout_constraintEnd_toEndOf="@+id/switchConnect"
         app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="@+id/textInputLayout3"
-        app:layout_constraintTop_toBottomOf="@+id/textInputLayout3" />
+        app:layout_constraintStart_toStartOf="@+id/serverIPportInputView"
+        app:layout_constraintTop_toBottomOf="@+id/serverIPportInputView" />
 
     <EditText
-        android:id="@+id/editTextTextPersonName7"
+        android:id="@+id/webControlURLinputView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
         android:ems="10"
         android:hint="@string/control_url_hint"
         android:inputType="textUri"
         android:minHeight="48dp"
         android:text="@string/control_url"
-        app:layout_constraintEnd_toEndOf="@+id/editTextTextPersonName4"
+        app:layout_constraintBottom_toTopOf="@+id/webControlView"
+        app:layout_constraintEnd_toEndOf="@+id/reastreamLabelInputView"
         app:layout_constraintHorizontal_bias="0.035"
-        app:layout_constraintStart_toStartOf="@+id/textInputLayout3"
-        app:layout_constraintTop_toBottomOf="@+id/editTextTextPersonName4" />
+        app:layout_constraintStart_toStartOf="@+id/serverIPportInputView" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -4,4 +4,5 @@
     <string name="server_ip_port">Server IP:PORT</string>
     <string name="control_url_hint">Control URL</string>
     <string name="control_url">http://rc.reaper.fm/ReaperWebControl</string>
+    <string name="connectLabel">Connect</string>
 </resources>
