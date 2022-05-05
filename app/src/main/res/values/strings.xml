@@ -1,8 +1,10 @@
 <resources>
     <string name="app_name">ReaStreamReceiverAndroidApp</string>
-    <string name="reastream_identifier_label">Reastream Identifier Label</string>
     <string name="server_ip_port">Server IP:PORT</string>
-    <string name="control_url_hint">Control URL</string>
-    <string name="control_url">http://rc.reaper.fm/ReaperWebControl</string>
     <string name="connectLabel">Connect</string>
+    <string name="reastream_identifier_label">Reastream Identifier Label</string>
+    <string name="control_url">http://rc.reaper.fm/ReaperWebControl/</string>
+    <string name="control_url_hint">Control URL</string>
+    <string name="inputDeviceListView_Default">---</string>
+    <string name="outputDeviceListView_Default">---</string>
 </resources>
