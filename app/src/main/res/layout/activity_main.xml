@@ -20,10 +20,11 @@
 
         <com.google.android.material.textfield.TextInputEditText
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="35dp"
             android:hint="@string/server_ip_port"
             android:inputType="textUri"
-            android:textSize="20sp" />
+            android:textSize="20sp"
+            tools:ignore="TouchTargetSizeCheck" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <!--  Control switch  -->
@@ -31,14 +32,18 @@
         android:id="@+id/switchConnect"
         android:layout_width="wrap_content"
         android:layout_height="0dp"
+        android:layout_marginStart="5dp"
         android:layout_marginEnd="20dp"
+        android:checked="false"
         android:minHeight="48dp"
         android:onClick="onSwitchToggleCb"
         android:text="@string/connectLabel"
         android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="@+id/serverIP_portInputView"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/serverIP_portInputView" />
+        app:layout_constraintStart_toEndOf="@+id/serverIP_portInputView"
+        app:layout_constraintTop_toTopOf="@+id/serverIP_portInputView"
+        tools:ignore="TouchTargetSizeCheck" />
 
 
     <!--  Reastream label  -->
@@ -46,7 +51,8 @@
         android:id="@+id/reastreamLabelInputView"
         android:layout_width="0dp"
         android:layout_height="54dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="10dp"
+        android:autofillHints=""
         android:ems="10"
         android:hint="@string/reastream_identifier_label"
         android:inputType="text"
@@ -56,34 +62,37 @@
         app:layout_constraintEnd_toEndOf="@+id/switchConnect"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@+id/serverIP_portInputView"
-        app:layout_constraintTop_toBottomOf="@+id/serverIP_portInputView"
-        android:autofillHints="" />
+        app:layout_constraintTop_toBottomOf="@+id/serverIP_portInputView" />
 
 
     <Spinner
         android:id="@+id/outputDeviceListView"
-        android:layout_width="181dp"
-        android:layout_height="76dp"
-        android:layout_marginTop="20dp"
+        android:layout_width="0dp"
+        android:layout_height="58dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="5dp"
         android:contentDescription="@string/inputDeviceListView_Default"
-        app:layout_constraintStart_toStartOf="@+id/serverIP_portInputView"
+        app:layout_constraintEnd_toStartOf="@+id/inputDeviceListView"
+        app:layout_constraintStart_toStartOf="@+id/reastreamLabelInputView"
         app:layout_constraintTop_toBottomOf="@+id/reastreamLabelInputView" />
 
     <Spinner
         android:id="@+id/inputDeviceListView"
-        android:layout_width="174dp"
-        android:layout_height="75dp"
-        android:layout_marginStart="26dp"
-        android:layout_marginTop="20dp"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="5dp"
         android:contentDescription="@string/inputDeviceListView_Default"
+        app:layout_constraintBottom_toBottomOf="@+id/outputDeviceListView"
+        app:layout_constraintEnd_toEndOf="@+id/reastreamLabelInputView"
         app:layout_constraintStart_toEndOf="@+id/outputDeviceListView"
-        app:layout_constraintTop_toBottomOf="@+id/reastreamLabelInputView" />
+        app:layout_constraintTop_toTopOf="@+id/outputDeviceListView" />
 
-
+    <!--  WebView for the server control mixer or the SubMix mixer  -->
     <EditText
         android:id="@+id/webControlURLinputView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
         android:autofillHints="@string/control_url"
         android:ems="10"
         android:hint="@string/control_url_hint"
@@ -91,17 +100,18 @@
         android:minHeight="48dp"
         android:onClick="onControlURLChangeCb"
         android:text="@string/control_url"
-        app:layout_constraintBottom_toTopOf="@+id/webControlView"
-        app:layout_constraintEnd_toEndOf="@+id/reastreamLabelInputView"
-        app:layout_constraintHorizontal_bias="0.035"
-        app:layout_constraintStart_toStartOf="@+id/serverIP_portInputView" />
+        app:layout_constraintEnd_toEndOf="@+id/switchConnect"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/serverIP_portInputView"
+        app:layout_constraintTop_toBottomOf="@+id/outputDeviceListView" />
 
-    <!--  WebView for the server control mixer or the SubMix mixer  -->
     <WebView
         android:id="@+id/webControlView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="300dp"
+        android:layout_marginTop="230dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

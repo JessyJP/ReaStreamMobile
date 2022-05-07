@@ -1,8 +1,9 @@
 package com.example.reastreamreceiverandroidapp
 
+// OS import
 // UI view elements
 // Audio Devices
-
+//import android.util.Log
 
 import android.media.AudioManager
 import android.os.Build
@@ -15,11 +16,11 @@ import android.widget.Spinner
 import android.widget.Switch
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 
 class MainActivity : AppCompatActivity() {
     // UI Element handles
-    private lateinit var ip_addressView: TextInputEditText
+    private lateinit var ip_addressView: TextInputLayout
     private lateinit var connectionSwitchView: Switch
     private lateinit var reastreamLabelView: EditText
     private lateinit var outputDeviceListView: Spinner
@@ -55,10 +56,13 @@ class MainActivity : AppCompatActivity() {
     // Initialize UI element handles and loading of the web control page
     private fun initializeHandles() {
         // Create handles on initial loading of the app
-        controlWebView = findViewById(R.id.webControlView)
-        controlURLView = findViewById(R.id.webControlURLinputView)
+        ip_addressView =  findViewById(R.id.serverIP_portInputView)
+        connectionSwitchView = findViewById(R.id.switchConnect)
+        reastreamLabelView = findViewById(R.id.reastreamLabelInputView)
         outputDeviceListView = findViewById(R.id.outputDeviceListView)
         inputDeviceListView = findViewById(R.id.inputDeviceListView)
+        controlWebView = findViewById(R.id.webControlView)
+        controlURLView = findViewById(R.id.webControlURLinputView)
 
     }
 
@@ -100,13 +104,30 @@ class MainActivity : AppCompatActivity() {
     // Connection callback function
     fun onSwitchToggleCb(view: View) {
         // Get the switch position
-
         // Check if all inputs are there.
-        controlWebView
+        var isConnected:Boolean = connectionSwitchView.isChecked
+        if (isConnected){
+            controlWebView.top = controlWebView.top - 150*3
+        }
+        else {
+            controlWebView.top = controlWebView.top + 150*3
+        }
+
+
+
+//        connectionSwitchView.setOnCheckedChangeListener { buttonView, isChecked ->
+//            if (isChecked) {
+//                // The toggle is enabled
+//            } else {
+//                // The toggle is disabled
+//            }
+//        }
+
+
     }
 
     fun onControlURLChangeCb(view: View) {
-
+       this.loadWebControlPage()
     }
 
     fun onReaStreamLabelChangeCb(view: View) {}
