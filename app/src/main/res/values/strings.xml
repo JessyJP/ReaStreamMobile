@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">ReaStreamReceiverAndroidApp</string>
     <string name="server_ip_port">Server IP:PORT</string>
@@ -7,4 +8,11 @@
     <string name="control_url_hint">Control URL</string>
     <string name="inputDeviceListView_Default">---</string>
     <string name="outputDeviceListView_Default">---</string>
+    <string-array name="defaultInputDeviceList">
+        <item>Default Input</item>
+    </string-array>
+    <string-array name="defaultOuputDeviceList">
+        <item>Default Output</item>
+    </string-array>
+
 </resources>

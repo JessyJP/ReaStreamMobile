@@ -11,10 +11,7 @@ import android.os.Bundle
 import android.view.View
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import android.widget.EditText
-import android.widget.Spinner
-import android.widget.Switch
-import android.widget.TextView
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.textfield.TextInputLayout
 
@@ -40,10 +37,8 @@ class MainActivity : AppCompatActivity() {
         initializeHandles()
 
         //connection Setup
-        connectionSetup()
+        preConnectionSetup()
 
-        // setup all the callbackfunctions
-        setupCallbacks()
     }
 
 //    override fun onDestroy() {
@@ -66,13 +61,16 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun connectionSetup() {
+    private fun preConnectionSetup() {
         // Enable javaScript
         controlWebView.settings.javaScriptEnabled = true
         // Create a web view for the web control page
         controlWebView.webViewClient = WebViewClient()
         // Load the web control page
         loadWebControlPage()
+
+        // Get audio devices and populate the dropdowns
+        getAudioDevices()
     }
 
     private fun loadWebControlPage() {
@@ -84,7 +82,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     // Get the available audio device
-    fun getAudioDevices() {
+    private fun getAudioDevices() {
         // Get audio devices
         val audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
 
@@ -92,12 +90,47 @@ class MainActivity : AppCompatActivity() {
             val adi = audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)
             println(adi)
         }
+
+        // Create an ArrayAdapter using the string array and a default spinner layout
+        ArrayAdapter.createFromResource(
+            this,
+            R.array.defaultOuputDeviceList,
+            android.R.layout.simple_spinner_item
+        ).also { adapter ->
+            // Specify the layout to use when the list of choices appears
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            // Apply the adapter to the spinner
+            outputDeviceListView.adapter = adapter
+        }
+
+        // Create an ArrayAdapter using the string array and a default spinner layout
+        ArrayAdapter.createFromResource(
+            this,
+            R.array.defaultInputDeviceList,
+            android.R.layout.simple_spinner_item
+        ).also { adapter ->
+            // Specify the layout to use when the list of choices appears
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            // Apply the adapter to the spinner
+            inputDeviceListView.adapter = adapter
+        }
+
+//        class SpinnerActivity : Activity(), AdapterView.OnItemSelectedListener {
+//
+//            override fun onItemSelected(parent: AdapterView<*>, view: View?, pos: Int, id: Long) {
+//                // An item was selected. You can retrieve the selected item using
+//                // parent.getItemAtPosition(pos)
+//            }
+//
+//            override fun onNothingSelected(parent: AdapterView<*>) {
+//                // Another interface callback
+//            }
+//        }
+
+        //spinner.onItemSelectedListener = this
+
     }
 
-
-    fun setupCallbacks() {
-
-    }
 
     //*** Callback functions section ***//
 
@@ -107,10 +140,10 @@ class MainActivity : AppCompatActivity() {
         // Check if all inputs are there.
         var isConnected:Boolean = connectionSwitchView.isChecked
         if (isConnected){
-            controlWebView.top = controlWebView.top - 150*3
+            controlWebView.top = controlWebView.top - 170*3
         }
         else {
-            controlWebView.top = controlWebView.top + 150*3
+            controlWebView.top = controlWebView.top + 170*3
         }
 
 
