@@ -26,6 +26,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var controlWebView: WebView
 
     // Internal variables
+    private var controlWebView_top_atStart = 0
 
 
     //*** Override methods ***//
@@ -136,14 +137,15 @@ class MainActivity : AppCompatActivity() {
 
     // Connection callback function
     fun onSwitchToggleCb(view: View) {
-        // Get the switch position
         // Check if all inputs are there.
-        var isConnected:Boolean = connectionSwitchView.isChecked
-        if (isConnected){
-            controlWebView.top = controlWebView.top - 170*3
+        if (controlWebView_top_atStart == 0){controlWebView_top_atStart = controlWebView.top}
+        // Get the switch position
+//        var isConnected:Boolean =
+        if (connectionSwitchView.isChecked){
+            controlWebView.top = controlWebView_top_atStart - 170*3//dp
         }
         else {
-            controlWebView.top = controlWebView.top + 170*3
+            controlWebView.top = controlWebView_top_atStart
         }
 
 
