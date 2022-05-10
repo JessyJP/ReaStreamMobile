@@ -8,7 +8,6 @@ package com.example.reastreamreceiverandroidapp
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.media.AudioDeviceInfo
 import android.media.AudioManager
 import android.os.Build
 import android.os.Bundle
@@ -25,10 +24,33 @@ import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
 
+// Debugging tags
+const val TAG    = "ReaStreamReceiver"
+const val sepTxt = "============================================="
+
+// connection properties
+class ReaperHostAddress {
+    var hostIP: String = "192.168.0.101"
+    var port: Int = 58710
+
+    constructor()
+    init{}
+}
+
+// Global connection properties initialization
+val ConnectionProperties = ReaperHostAddress()
+
+class UDP_listner: Runnable, MainActivity() {
+    override fun run() {
+        Log.i(TAG,"${Thread.currentThread()} Runnable Thread Started.")
+        while (true){
+            onReceiveUDP()
+        }
+    }
+}
+
 
 open class MainActivity : AppCompatActivity() {
-    private val TAG = "ReaStreamReceiver"
-    private val sepTxt = "============================================="
 
     // UI Element handles
     private lateinit var ip_addressView: TextInputLayout
@@ -42,8 +64,10 @@ open class MainActivity : AppCompatActivity() {
     // Internal variables
     private var controlWebView_top_atStart = 0
 
+    //
+    lateinit var  threadWithRunnable : Thread
 
-    //*** Override methods ***//
+    //***+++ Override methods +++***//
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.i(TAG,sepTxt)
         super.onCreate(savedInstanceState)
@@ -56,10 +80,9 @@ open class MainActivity : AppCompatActivity() {
         //connection Setup
         preConnectionSetup()
 
+        // Create the UDP listner
+        startUDPlistner()
 
-        ////////////++++++++++++++++++++++++++//////////// UDP TEST
-        testUDP()
-        ////////////++++++++++++++++++++++++++//////////// UDP TEST
     }
 
 //    override fun onDestroy() {
@@ -67,10 +90,9 @@ open class MainActivity : AppCompatActivity() {
 //        super.onDestroy();
 //    }
 
-    //*** Internal control methods ***//
+    //***+++ Internal control methods +++***//
 
     // Initialize UI element handles and loading of the web control page
-
     private fun initializeHandles() {
         Log.i(TAG,"Initialize UI handles")
         // Create handles on initial loading of the app
@@ -84,6 +106,7 @@ open class MainActivity : AppCompatActivity() {
 
     }
 
+    // Pre connection setup
     private fun preConnectionSetup() {
         Log.i(TAG,"Do pre connection setup")
         // Enable javaScript
@@ -99,6 +122,7 @@ open class MainActivity : AppCompatActivity() {
         getAudioDevices()
     }
 
+    // Load the web control web page
     private fun loadWebControlPage() {
         Log.i(TAG,"Load the web control web page")
         val url: String = controlURLView.text.toString()
@@ -113,31 +137,28 @@ open class MainActivity : AppCompatActivity() {
 
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            var ListAudioDevices = audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)+audioManager.getDevices(AudioManager.GET_DEVICES_INPUTS)
+            var ListAudioDevices = audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)+ audioManager.getDevices(AudioManager.GET_DEVICES_INPUTS)
             Log.i(TAG,sepTxt.replace("=","-"))
             Log.i(TAG,"Show Audio devices:")
-
-            fun printAudioDeviceList(ListAudioDevices : Array<AudioDeviceInfo>) {
-                for (dev in ListAudioDevices) {
-                    Log.i(
-                        TAG,
-                        dev.productName.toString() + " " +
-                                "IN[" + dev.isSink + "]  " +
-                                "OUT[" + dev.isSource + "] "
-                    )
-                    for (ch in dev.channelCounts) {
-                        Log.i(TAG, "    + Ch[" + ch + "]) ")
-                    }
-                    for (sr in dev.sampleRates) {
-                        Log.i(TAG, "        + SR[$sr]Hz ")
-                    }
+            //  Print the device info
+            for (dev in ListAudioDevices) {
+                Log.i(
+                    TAG,
+                    dev.productName.toString() + " " +
+                            "IN[" + dev.isSink + "]  " +
+                            "OUT[" + dev.isSource + "] "
+                )
+                for (ch in dev.channelCounts) {
+                    Log.i(TAG, "    + Ch[" + ch + "]) ")
+                }
+                for (sr in dev.sampleRates) {
+                    Log.i(TAG, "        + SR[$sr]Hz ")
                 }
             }
-            printAudioDeviceList(ListAudioDevices )
             Log.i(TAG,sepTxt.replace("=","-"))
         }
 
-        Log.i(TAG,"Populate the spinner enteis with the audio device data")
+        Log.i(TAG,"Populate the spinner entries with the audio device data")
         // Create an ArrayAdapter using the string array and a default spinner layout
         ArrayAdapter.createFromResource(
             this,
@@ -149,6 +170,7 @@ open class MainActivity : AppCompatActivity() {
             // Apply the adapter to the spinner
             outputDeviceListView.adapter = adapter
         }
+        // TODO: populate with the actual device values for the input and the output device
 
         // Create an ArrayAdapter using the string array and a default spinner layout
         ArrayAdapter.createFromResource(
@@ -175,22 +197,35 @@ open class MainActivity : AppCompatActivity() {
 //        }
 
         //spinner.onItemSelectedListener = this
+        // TODO("The callback needs to be connected to the UI elements for the device selection.")
+        // TODO("Add sample rate boxes.")
+        // TODO "make the web control UI dinamyc and make sliding page for it"
 
     }
 
+    private fun startUDPlistner()
+    {
+        // todo add a listener check if the thread has already been initialized
+        Log.i(TAG,"Create Runnable UDP listener.")
+        threadWithRunnable = Thread(UDP_listner())
+        threadWithRunnable.start()
+        // TODO finish the udp listner
+        Log.i(TAG,"UDP listener success.")
+    }
 
-    //*** Callback functions section ***//
+    //***+++ Callback functions section +++***//
 
     // Connection callback function
     fun onSwitchToggleCb(view: View) {
+        // TODO include debug messages in this function
         // Check if all inputs are there.
         if (controlWebView_top_atStart == 0){controlWebView_top_atStart = controlWebView.top}
         // Get the switch position
 //        var isConnected:Boolean =
         if (connectionSwitchView.isChecked){
             controlWebView.top = controlWebView_top_atStart - 170*3//dp
-            // **********
-            testUDP()
+
+
         }
         else {
             controlWebView.top = controlWebView_top_atStart
@@ -215,19 +250,6 @@ open class MainActivity : AppCompatActivity() {
 
     fun onReaStreamLabelChangeCb(view: View) {}
 
-
-    fun testUDP()
-    {
-        Log.i(TAG,"Create Runnable example.")
-        val threadWithRunnable = Thread(udp_DataArrival())
-        threadWithRunnable.start()
-
-        // Add text to textView1.
-        val textView = findViewById<TextView>(R.id.textViewDebugTest)
-        textView.text = "Hello World from main!\n"
-
-        Log.i(TAG,"MainActivity onCreate success.")
-    }
 
    // ********** AUDIO device selection
 //    https://www.twilio.com/blog/easily-manage-audio-devices-on-android-with-audioswitch
@@ -255,14 +277,53 @@ open class MainActivity : AppCompatActivity() {
 //            mAudioManager.setSpeakerphoneOn(true);
 //        }
     }
-//////////////////////////////////////////////////////////////
-    // UDP
 
+
+    //***+++ UDP connection functions  +++***//
+
+    // Recieve UDP packet callback
+    open fun onReceiveUDP() {
+        val buffer = ByteArray(2048)
+        var socket: DatagramSocket? = null
+        try {
+            //Keep a socket open to listen to all the UDP trafic that is destined for this port
+            socket = DatagramSocket(ConnectionProperties.port, InetAddress.getByName(ConnectionProperties.hostIP))
+            socket.broadcast = true
+            val packet = DatagramPacket(buffer, buffer.size)
+            socket.receive(packet)
+            Log.v(TAG,"open fun receiveUDP packet received = " + packet.data)
+
+        } catch (e: Exception) {
+            Log.v(TAG, "open fun receiveUDP catch exception.$e")
+            e.printStackTrace()
+        } finally {
+            socket?.close()
+        }
+    }
+
+    // todo for now ignore this function
+    fun sendUDP(messageStr: String) {
+        // Hack Prevent crash (sending should be done using an async task)
+        val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
+        StrictMode.setThreadPolicy(policy)
+        try {
+            //Open a port to send the package
+            val socket = DatagramSocket()
+            socket.broadcast = true
+            val sendData = messageStr.toByteArray()
+            val sendPacket = DatagramPacket(sendData, sendData.size, InetAddress.getByName(ConnectionProperties.hostIP), ConnectionProperties.port)
+            socket.send(sendPacket)
+            Log.v(TAG,"fun sendBroadcast: packet sent to: " + InetAddress.getByName(ConnectionProperties.hostIP) + ":" + ConnectionProperties.port)
+        } catch (e: IOException) {
+            //            Log.e(FragmentActivity.TAG, "IOException: " + e.message)
+        }
+    }
 
     fun clickButtonSend(view: View) {
+        // todo fix this function
         // Do something in response to button
         // Send editText1 Text thru UDP.
-        val editText = findViewById<EditText>(R.id.editText1)
+        val editText = this.reastreamLabelView
         var message = editText.text.toString()
         sendUDP(message)
         // Add text to textView1.
@@ -273,44 +334,12 @@ open class MainActivity : AppCompatActivity() {
         editText.setText("")// Clear Input text.
     }
 
-    fun sendUDP(messageStr: String) {
-        // Hack Prevent crash (sending should be done using an async task)
-        val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
-        StrictMode.setThreadPolicy(policy)
-        try {
-            //Open a port to send the package
-            val socket = DatagramSocket()
-            socket.broadcast = true
-            val sendData = messageStr.toByteArray()
-            val sendPacket = DatagramPacket(sendData, sendData.size, InetAddress.getByName(Settings.RemoteHost), Settings.RemotePort)
-            socket.send(sendPacket)
-            println("fun sendBroadcast: packet sent to: " + InetAddress.getByName(Settings.RemoteHost) + ":" + Settings.RemotePort)
-        } catch (e: IOException) {
-            //            Log.e(FragmentActivity.TAG, "IOException: " + e.message)
-        }
-    }
 
-    open fun receiveUDP() {
-        val buffer = ByteArray(2048)
-        var socket: DatagramSocket? = null
-        try {
-            //Keep a socket open to listen to all the UDP trafic that is destined for this port
-            socket = DatagramSocket(Settings.RemotePort, InetAddress.getByName(Settings.RemoteHost))
-            socket.broadcast = true
-            val packet = DatagramPacket(buffer, buffer.size)
-            socket.receive(packet)
-            println("open fun receiveUDP packet received = " + packet.data)
-
-        } catch (e: Exception) {
-            println("open fun receiveUDP catch exception." + e.toString())
-            e.printStackTrace()
-        } finally {
-            socket?.close()
-        }
-    }
 
 }
 
+
+//////////////////////////////////////////////+++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 class BluetoothReceiver : BroadcastReceiver() {
     private var localAudioManager: AudioManager? = null
@@ -400,27 +429,3 @@ class BluetoothReceiver : BroadcastReceiver() {
 //mAudioManager.stopBluetoothSco();
 //mAudioManager.setBluetoothScoOn(false);
 //mAudioManager.setSpeakerphoneOn(true); // turn on speaker phone
-
-
-
-
-class SoftOptions {
-    var RemoteHost: String = "192.168.1.255"
-    var RemotePort: Int = 6454
-
-    constructor()
-    init{}
-}
-
-
-// Global
-val Settings = SoftOptions()
-
-class udp_DataArrival: Runnable, MainActivity() {
-    override fun run() {
-        println("${Thread.currentThread()} Runnable Thread Started.")
-        while (true){
-            receiveUDP()
-        }
-    }
-}
