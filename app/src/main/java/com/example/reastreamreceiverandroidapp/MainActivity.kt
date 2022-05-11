@@ -28,66 +28,6 @@ import java.net.InetAddress
 const val TAG    = "ReaStreamReceiver"
 const val sepTxt = "============================================="
 
-// connection properties
-class ReaperHostAddress {
-    var hostIP: String = "192.168.0.101"
-    var port: Int = 58710
-
-    constructor()
-    init{}
-}
-
-// Global connection properties initialization
-val ConnectionProperties = ReaperHostAddress()
-
-class UDP_listner: Runnable, MainActivity() {
-    override fun run() {
-        // Thread callback message
-        Log.i(TAG,"${Thread.currentThread()} Runnable Thread Started.")
-        // Retry to open the socket
-        while (true){
-            // Recieve UDP packet callback
-            var buffer = ByteArray(2048)
-            var socket: DatagramSocket? = null
-            var packetCounter = 0
-            try {
-                //Keep a socket open to listen to all the UDP trafic that is destined for this port
-                socket = DatagramSocket(ConnectionProperties.port)//, InetAddress.getByName(ConnectionProperties.hostIP)
-                socket.broadcast = true
-                while (true) {
-                    var packet = DatagramPacket(buffer, buffer.size)
-                    socket.receive(packet)
-                    bufferUnpack(packet)
-                    packetCounter ++
-                    Log.v(TAG, "open fun receiveUDP packet [$packetCounter] received = " + packet.data)
-                }
-            } catch (e: Exception) {
-                Log.v(TAG, "open fun receiveUDP catch exception.$e")
-                e.printStackTrace()
-            } finally {
-                socket?.close()
-            }
-        }
-    }
-
-    fun bufferUnpack(packet : DatagramPacket)
-    {
-//        %     typedef struct ReaStream
-//        %     {
-//        %     char ID[4]; // 'MRSR' tag for every packet like an ID (4 bytes)
-//        %     unsigned int packetSize; // size of the entire UDP packet (4 bytes)
-//        %     char name[32]; // Name of the stream (ie: default on the plugin) (32 bytes)
-//        %     unsigned int nbChan; // the number of channels the plugin sends (1 byte)
-//        %     unsigned int freq; // the rate Frequency of the data (44100, 48000, ...) (4 bytes)
-//        %     unsigned datasSize; // size of the following bytes to read. (2 bytes)
-//        %     float *datas; // start of the audio datas (variable get from "datasSize")
-//        %     } ReaStream;
-
-        val MRSR: String = ""//packet.data.copyofRange(0,3).
-    }
-}
-
-
 open class MainActivity : AppCompatActivity() {
 
     // UI Element handles
@@ -242,7 +182,7 @@ open class MainActivity : AppCompatActivity() {
     {
         // todo add a listener check if the thread has already been initialized
         Log.i(TAG,"Create Runnable UDP listener.")
-        threadWithRunnable = Thread(UDP_listner())
+        threadWithRunnable = Thread(UDP_listner(this))
         threadWithRunnable.start()
         // TODO finish the udp listner
         Log.i(TAG,"UDP listener success.")
