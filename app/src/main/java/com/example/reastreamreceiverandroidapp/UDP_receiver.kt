@@ -28,8 +28,9 @@ class UDP_receiver(UI_handle : MainActivity): Runnable, MainActivity() {
     }
 
     override fun run() {
+        var msgPrefix = "Audio Receiver:"
         // Thread callback message
-        Log.i(TAG,"${Thread.currentThread()} Runnable Thread Started.")
+        Log.i(TAG,"${Thread.currentThread()} $msgPrefix Thread Started")
         // Retry to open the socket
         while (true){
             // Recieve UDP packet callback
@@ -54,19 +55,20 @@ class UDP_receiver(UI_handle : MainActivity): Runnable, MainActivity() {
                     {
                         bufferUnpack(packet)
                         packetCounter++
-                        Log.v(TAG,"open fun receiveUDP packet [$packetCounter] received = " + packet.data)
+                        Log.v(TAG,"$msgPrefix packet [$packetCounter] received = " + packet.data)
                     }
                     else{
-                        Log.v(TAG,"not a reastream packet")
+                        Log.v(TAG,"$msgPrefix not a reastream packet")
                     }
                 }
             } catch (e: Exception) {
-                Log.v(TAG, "open fun receiveUDP catch exception.$e")
+                Log.v(TAG, "$msgPrefix catch exception.$e")
                 e.printStackTrace()
             } finally {
                 socket?.close()
             }
         }
+        Log.i(TAG,"${Thread.currentThread()} Start Audio Receiver Thread")
     }
 
     fun bufferUnpack(packet : DatagramPacket)
@@ -109,5 +111,7 @@ class UDP_receiver(UI_handle : MainActivity): Runnable, MainActivity() {
         return ByteBuffer.wrap(bytes).int
     }
 
-    class audioFrame
+
 }
+
+class audioFrame
