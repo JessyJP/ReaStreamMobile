@@ -11,7 +11,6 @@ import android.content.Intent
 import android.media.AudioManager
 import android.os.Build
 import android.os.Bundle
-import android.os.StrictMode
 import android.util.Log
 import android.view.View
 import android.webkit.WebView
@@ -19,10 +18,6 @@ import android.webkit.WebViewClient
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.textfield.TextInputLayout
-import java.io.IOException
-import java.net.DatagramPacket
-import java.net.DatagramSocket
-import java.net.InetAddress
 
 // Debugging tags
 const val TAG    = "ReaStreamReceiver"
@@ -178,14 +173,20 @@ open class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun startUDPlistner()
-    {
+    private fun startUDPlistner() {
         // todo add a listener check if the thread has already been initialized
         Log.i(TAG,"Create Runnable UDP listener.")
-        threadWithRunnable = Thread(UDP_listner(this))
+        threadWithRunnable = Thread(UDP_receiver(this))
         threadWithRunnable.start()
         // TODO finish the udp listner
         Log.i(TAG,"UDP listener success.")
+    }
+
+    //***+++ Get & Set Methods +++***//
+    fun getReastreamLabel(): String =  reastreamLabelView.text.toString()
+
+    fun setHostIPTextView(hostIP:String){
+        ip_addressView.hint = hostIP
     }
 
     //***+++ Callback functions section +++***//
@@ -258,40 +259,7 @@ open class MainActivity : AppCompatActivity() {
 
     //***+++ UDP connection functions  +++***//
 
-    // Recieve UDP packet callback
 
-    // todo for now ignore this function
-    fun sendUDP(messageStr: String) {
-        // Hack Prevent crash (sending should be done using an async task)
-        val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
-        StrictMode.setThreadPolicy(policy)
-        try {
-            //Open a port to send the package
-            val socket = DatagramSocket()
-            socket.broadcast = true
-            val sendData = messageStr.toByteArray()
-            val sendPacket = DatagramPacket(sendData, sendData.size, InetAddress.getByName(ConnectionProperties.hostIP), ConnectionProperties.port)
-            socket.send(sendPacket)
-            Log.v(TAG,"fun sendBroadcast: packet sent to: " + InetAddress.getByName(ConnectionProperties.hostIP) + ":" + ConnectionProperties.port)
-        } catch (e: IOException) {
-            //            Log.e(FragmentActivity.TAG, "IOException: " + e.message)
-        }
-    }
-
-    fun clickButtonSend(view: View) {
-        // todo fix this function
-        // Do something in response to button
-        // Send editText1 Text thru UDP.
-        val editText = this.reastreamLabelView
-        var message = editText.text.toString()
-        sendUDP(message)
-        // Add text to textView1.
-//        val textView = findViewById<TextView>(R.id.textView1)
-//        var chat = textView.text.toString()
-//        textView.setText(chat + message + "\n")
-        // Clear editText1 after all sent.
-        editText.setText("")// Clear Input text.
-    }
 
 
 
