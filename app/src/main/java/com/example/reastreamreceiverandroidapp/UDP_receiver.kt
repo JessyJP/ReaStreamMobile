@@ -44,8 +44,9 @@ class UDP_receiver(UI_handle : MainActivity): Runnable, MainActivity() {
                 var packet = DatagramPacket(buffer, buffer.size)
                 //First packet to setup
                 socket.receive(packet)
+                var RSF_frame : ReastreamFrame = ReastreamFrame()
 //                if (isReaStreamFrame(packet))  &
-                bufferUnpack(packet)
+                RSF_frame.unpackUDPdataStreamtoBuffer(packet)
                 //todo do the first packet and get info to pass to the UI and the audio device setup
 
                 while (true) {
@@ -53,7 +54,8 @@ class UDP_receiver(UI_handle : MainActivity): Runnable, MainActivity() {
                     socket.receive(packet)
                     if (isReaStreamFrame(packet))
                     {
-                        bufferUnpack(packet)
+                        RSF_frame.unpackUDPdataStreamtoBuffer(packet)
+                        //Todo pass the audio frame "RSF_frame" to the audio playback listener
                         packetCounter++
                         Log.v(TAG,"$msgPrefix packet [$packetCounter] received = " + packet.data)
                     }
@@ -71,36 +73,59 @@ class UDP_receiver(UI_handle : MainActivity): Runnable, MainActivity() {
         Log.i(TAG,"${Thread.currentThread()} Start Audio Receiver Thread")
     }
 
-    fun bufferUnpack(packet : DatagramPacket)
-    {
+
+
+    fun isReaStreamFrame(packet : DatagramPacket) : Boolean {
+        return (String(packet.data.sliceArray(0..3), StandardCharsets.UTF_8) == "MRSR")
+    }
+
+
+}
+
+class ReastreamFrame {
+    val MRSR : String = "MRSR"
+    var packetSize : Int = 1247
+    var ReaStreamLabel : String = ""
+    var numAudioChannels: Int = 2
+    var audioSampleRate: Int = 48000
+    var sampleSize: Int = 1200
+    var audioSample: IntArray = IntArray(sampleSize/4)
+
 //        %     typedef struct ReaStream
 //        %     {
 //        %     char ID[4]; // 'MRSR' tag for every packet like an ID (4 bytes)
 //        %     unsigned int packetSize; // size of the entire UDP packet (4 bytes)
-//        %     char name[32]; // Name of the stream (ie: default on the plugin) (32 bytes)
-//        %     unsigned int nbChan; // the number of channels the plugin sends (1 byte)
-//        %     unsigned int freq; // the rate Frequency of the data (44100, 48000, ...) (4 bytes)
-//        %     unsigned datasSize; // size of the following bytes to read. (2 bytes)
-//        %     float *datas; // start of the audio datas (variable get from "datasSize")
+//        %     char ReastreamLabel[32]; // Name of the stream (ie: default on the plugin) (32 bytes)
+//        %     unsigned int numAudioChannels; // the number of channels the plugin sends (1 byte)
+//        %     unsigned int audioSampleRate; // the rate Frequency of the data (44100, 48000, ...) (4 bytes)
+//        %     unsigned sampleSize; // size of the following bytes to read. (2 bytes)
+//        %     float *datas; // start of the audio datas (variable get from "sampleSize")
 //        %     } ReaStream;
+
+
+    fun unpackUDPdataStreamtoBuffer(packet : DatagramPacket)
+    {
+
         var p: Int = 0+4// Position offset
         val data : ByteArray= packet.data// Get the data byte buffer
 //        BitConverter.toInt32(data.sliceArray(p+..p))
-        var L = toInt32(data.sliceArray(p until p+4))// Packet data length is 4 bytes
-        L = packet.length// this should be the same
+        packetSize = toInt32(data.sliceArray(p until p+4))// Packet data length is 4 bytes
+        packetSize = packet.length// this should be the same
         p += 4
         // Reastream Label
-        val ReaStreamLabel: String = String(packet.data.sliceArray(p until p+32), StandardCharsets.UTF_8)
+        ReaStreamLabel = String(packet.data.sliceArray(p until p+32), StandardCharsets.UTF_8)
         p += 32
 
-        val numAudioChannels: Int = data[p].toInt()
+        numAudioChannels = data[p].toInt()
         p += 1
 
-        val audioSampleRate: Int = toInt32(data.sliceArray(p until p+4))
-    }
+        audioSampleRate = toInt32(data.sliceArray(p until p+4))
+        p += 4
 
-    fun isReaStreamFrame(packet : DatagramPacket) : Boolean {
-        return (String(packet.data.sliceArray(0..3), StandardCharsets.UTF_8) == "MRSR")
+        sampleSize = toInt32(data.sliceArray(p until p+4))
+        p += 4
+
+//        audioSample = data.sliceArray(p until p+sampleSize)
     }
 
     fun toInt32(bytes:ByteArray):Int {
@@ -111,7 +136,10 @@ class UDP_receiver(UI_handle : MainActivity): Runnable, MainActivity() {
         return ByteBuffer.wrap(bytes).int
     }
 
-
+    fun packDataStreamtoToBynaryStream():ByteArray
+    {
+        var data : ByteArray = ByteArray(packetSize)
+        MRSR.toByte() + packetSize.toByte() // TODO + add the rest of the
+        return data
+    }
 }
-
-class audioFrame
