@@ -188,6 +188,10 @@ open class MainActivity : AppCompatActivity() {
         ip_addressView.hint = hostIP
     }
 
+    fun getIsConnectionSwitchStateON(): Boolean{
+        return connectionSwitchView.isChecked
+    }
+
     //***+++ Callback functions section +++***//
 
     // Connection callback function

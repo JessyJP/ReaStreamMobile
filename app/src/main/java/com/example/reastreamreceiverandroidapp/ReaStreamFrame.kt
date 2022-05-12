@@ -54,6 +54,7 @@ class ReastreamFrame {
 // todo remove this here
     }
 
+    // TODO Eventually those conversion routines should be made in the most optimized and fast and efficient way possible
     fun toInt32(bytes: ByteArray): Int {
         if (bytes.size != 4) {
             throw Exception("wrong len")
@@ -100,4 +101,7 @@ class ReastreamFrame {
         return ints
     }
 
+    override fun toString(): String {
+        return "lbl[$ReaStreamLabel] ch[$numAudioChannels] smpR[$audioSampleRate]Hz data[${audioSample[0]},${audioSample[1]},...] of $sampleSize"
+    }
 }
