@@ -5,13 +5,13 @@ import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
 
 class ReastreamFrame {
-    val MRSR : String = "MRSR"
-    var packetSize : Int = 1247
-    var ReaStreamLabel : String = ""
+    val MRSR: String = "MRSR"
+    var packetSize: Int = 1247
+    var ReaStreamLabel: String = ""
     var numAudioChannels: Int = 2
     var audioSampleRate: Int = 48000
     var sampleSize: Int = 1200
-    var audioSample: IntArray = IntArray(sampleSize/4)
+    var audioSample: IntArray = IntArray(sampleSize / 4)
 
 //        %     typedef struct ReaStream
 //        %     {
@@ -25,33 +25,36 @@ class ReastreamFrame {
 //        %     } ReaStream;
 
 
-    fun unpackUDPdataStreamtoBuffer(packet : DatagramPacket)
-    {
+    fun unpackUDPdataStreamtoBuffer(packet: DatagramPacket) {
 
-        var p: Int = 0+4// Position offset
-        val data : ByteArray= packet.data// Get the data byte buffer
+        var p: Int = 0 + 4// Position offset
+        val data: ByteArray = packet.data// Get the data byte buffer
 //        BitConverter.toInt32(data.sliceArray(p+..p))
-        packetSize = toInt32(data.sliceArray(p until p+4))// Packet data length is 4 bytes
+        packetSize = toInt32(data.sliceArray(p until p + 4))// Packet data length is 4 bytes
         packetSize = packet.length// this should be the same
         p += 4
         // Reastream Label
-        ReaStreamLabel = String(packet.data.sliceArray(p until p+32), StandardCharsets.UTF_8)
+        ReaStreamLabel = String(packet.data.sliceArray(p until p + 32), StandardCharsets.UTF_8)
         p += 32
 
         numAudioChannels = data[p].toInt()
         p += 1
 
-        audioSampleRate = toInt32(data.sliceArray(p until p+4))
+        audioSampleRate = toInt32(data.sliceArray(p until p + 4))
         p += 4
 
-        sampleSize = toInt32(data.sliceArray(p until p+4))
+        sampleSize = toInt32(data.sliceArray(p until p + 4))
         p += 4
 
-//        audioSample = IntArray(data.sliceArray(p until p+sampleSize))
+        audioSample = convertByteArrayToIntArray(data.sliceArray(p until p + sampleSize))
 
+        // TODO do intiger conversion testing
+//        val generatedArray = IntArray(10) { i -> i * i }
+//        val numbers: IntArray = intArrayOf(10, 20, 30, 40, 50)
+// todo remove this here
     }
 
-    fun toInt32(bytes:ByteArray):Int {
+    fun toInt32(bytes: ByteArray): Int {
         if (bytes.size != 4) {
             throw Exception("wrong len")
         }
@@ -59,10 +62,42 @@ class ReastreamFrame {
         return ByteBuffer.wrap(bytes).int
     }
 
-    fun packDataStreamtoToBynaryStream():ByteArray
-    {
-        var data : ByteArray = ByteArray(packetSize)
-        MRSR.toByte() + packetSize.toByte() // TODO + add the rest of the
+    fun packDataStreamtoToBynaryStream(): ByteArray {
+        var data: ByteArray = ByteArray(packetSize)
+        MRSR.toByte() + packetSize.toByte() // TODO + add the rest of the properties in the correct order
+
+//        val ints = intArrayOf(0x01, 0xFF)//todo example array, test the code below
+        data += audioSample.foldIndexed(ByteArray(audioSample.size)) { i, a, v ->
+            a.apply {
+                set(
+                    i,
+                    v.toByte()
+                )
+            }
+        }
+
         return data
     }
+
+
+    fun convertByteArrayToInt(intBytes: ByteArray): Int {
+        val byteBuffer = ByteBuffer.wrap(intBytes)
+        return byteBuffer.int
+    }
+
+    fun convertByteArrayToIntArray(data: ByteArray): IntArray {
+//        if (data == null || data.size % 4 != 0) return null
+        // ----------
+        val ints = IntArray(data.size / 4)
+        for (i in ints.indices) ints[i] = convertByteArrayToInt(
+            byteArrayOf(
+                data[i * 4],
+                data[i * 4 + 1],
+                data[i * 4 + 2],
+                data[i * 4 + 3]
+            )
+        )
+        return ints
+    }
+
 }

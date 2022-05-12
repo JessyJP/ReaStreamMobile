@@ -175,11 +175,10 @@ open class MainActivity : AppCompatActivity() {
 
     private fun startUDPlistner() {
         // todo add a listener check if the thread has already been initialized
-        Log.i(TAG,"Create Runnable UDP listener.")
+        Log.i(TAG,"Create UDP receiver.")
         threadWithRunnable = Thread(UDP_receiver(this))
+        Log.i(TAG,"Start UDP receiver in separate thread.")
         threadWithRunnable.start()
-        // TODO finish the udp listner
-        Log.i(TAG,"UDP listener success.")
     }
 
     //***+++ Get & Set Methods +++***//

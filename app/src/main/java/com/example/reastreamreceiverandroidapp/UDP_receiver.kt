@@ -27,15 +27,21 @@ class UDP_receiver(UI_handle : MainActivity): Runnable, MainActivity() {
     }
 
     override fun run() {
-        var msgPrefix = "Audio Receiver:"
+        var msgPrefix = "UDP Receiver:"
         // Thread callback message
         Log.i(TAG,"${Thread.currentThread()} $msgPrefix Thread Started")
         // Retry to open the socket
-        while (true){
+        val maxRetryCount = 10
+        var retryCount = maxRetryCount
+        while (retryCount > 0){
             // Recieve UDP packet callback
+
+            // Define all the variables and classes
             var buffer = ByteArray(2048)
             var socket: DatagramSocket? = null
             var packetCounter = 0
+            var frame : ReastreamFrame = ReastreamFrame()
+
             try {
                 //Keep a socket open to listen to all the UDP trafic that is destined for this port
                 socket = DatagramSocket(ConnectionProperties.port)//, InetAddress.getByName(ConnectionProperties.hostIP)
@@ -43,20 +49,21 @@ class UDP_receiver(UI_handle : MainActivity): Runnable, MainActivity() {
                 var packet = DatagramPacket(buffer, buffer.size)
                 //First packet to setup
                 socket.receive(packet)
-                var RSF_frame : ReastreamFrame = ReastreamFrame()
-//                if (isReaStreamFrame(packet))  &
-                RSF_frame.unpackUDPdataStreamtoBuffer(packet)
-                //todo do the first packet and get info to pass to the UI and the audio device setup
 
+//                if (isReaStreamFrame(packet))  &
+                println(frame.MRSR)
+                frame.unpackUDPdataStreamtoBuffer(packet)
+                //todo do the first packet and get info to pass to the UI and the audio device setup
+                println(frame.MRSR)
                 while (true) {
                     packet = DatagramPacket(buffer, buffer.size)
                     socket.receive(packet)
                     if (isReaStreamFrame(packet))
                     {
-                        RSF_frame.unpackUDPdataStreamtoBuffer(packet)
+                        frame.unpackUDPdataStreamtoBuffer(packet)
                         //Todo pass the audio frame "RSF_frame" to the audio playback listener
                         packetCounter++
-                        Log.v(TAG,"$msgPrefix packet [$packetCounter] received = " + packet.data)
+                        Log.v(TAG,"$msgPrefix packet [$packetCounter] received = " + frame.audioSample)
                     }
                     else{
                         Log.v(TAG,"$msgPrefix not a reastream packet")
@@ -68,8 +75,11 @@ class UDP_receiver(UI_handle : MainActivity): Runnable, MainActivity() {
             } finally {
                 socket?.close()
             }
+            // Decrease the retry count
+            retryCount -= 1
+            Log.i(TAG,"${Thread.currentThread()}  $msgPrefix Thread remaining retry to connect $retryCount / $maxRetryCount ")
         }
-        Log.i(TAG,"${Thread.currentThread()} Start Audio Receiver Thread")
+        Log.i(TAG,"${Thread.currentThread()}  $msgPrefix Thread Stopped")
     }
 
 
