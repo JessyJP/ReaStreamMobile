@@ -58,6 +58,7 @@ class UDP_receiver(UI_handle : MainActivity): Runnable, MainActivity() {
                 if (isReaStreamFrame(firstPacket)) {
                     val firstFrame: ReastreamFrame = ReastreamFrame()
                     firstFrame.unpackUDPdataStreamtoBuffer(firstPacket)
+                    // TODO should I filter by reastream label here too
                     Log.d(TAG,"$msgPrefix first packet frame for setup [$frameCounter] received = $firstFrame")
                     // Pass the IP to the UI
                     UI.setHostIPTextView(firstPacket.address.toString())
@@ -76,10 +77,15 @@ class UDP_receiver(UI_handle : MainActivity): Runnable, MainActivity() {
                     {
                         val frame : ReastreamFrame = ReastreamFrame()
                         frame.unpackUDPdataStreamtoBuffer(packet)
-                        frameCounter++
-                        Log.d(TAG,"$msgPrefix frame [$frameCounter] received = $frame")
-                        //Todo Pass the audio frame to the audio playback listener
-                        // todo code to audio here---+++
+                        if (frame.ReaStreamLabel == ListenReaStreamLabel) {
+                            frameCounter++
+                            if(DEBUG)Log.d(TAG, "$msgPrefix frame [$frameCounter] received = $frame")
+                            //Todo Pass the audio frame to the audio playback listener
+                            // todo code to audio here---+++
+                        }else{
+                            Log.d(TAG,"$msgPrefix frame skip because [\"${frame.ReaStreamLabel}\"] != [\"$ListenReaStreamLabel\"]")
+                            // TODO include some time delay
+                        }
                     }
                     else{
                         Log.e(TAG,"$msgPrefix not a reastream packet")

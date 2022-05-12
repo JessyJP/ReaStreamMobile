@@ -34,7 +34,7 @@ class ReastreamFrame {
         packetSize = packet.length// this should be the same
         p += 4
         // Reastream Label
-        ReaStreamLabel = String(packet.data.sliceArray(p until p + 32), StandardCharsets.UTF_8)
+        ReaStreamLabel = String(packet.data.sliceArray(p until p + 32), StandardCharsets.US_ASCII).trim(Char(0))
         p += 32
 
         numAudioChannels = data[p].toInt()
