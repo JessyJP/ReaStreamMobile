@@ -38,11 +38,11 @@ class UDP_receiver(UI_handle : MainActivity): Runnable, MainActivity() {
         var frameCounter = 0
 
         // Retry to open the socket
-        val maxRetryCount = 10
+        val maxRetryCount = 100
         var retryCount = maxRetryCount
 
         // Inside the loop is the effective receive UDP packet callback
-        while (retryCount > 0){
+        while (retryCount > 0 && UI.getIsConnectionSwitchStateON()){
              try {
                 //Keep a socket open to listen to all the UDP trafic that is destined for this port
                 socket = DatagramSocket(ConnectionProperties.port)//, InetAddress.getByName(ConnectionProperties.hostIP)
@@ -69,30 +69,38 @@ class UDP_receiver(UI_handle : MainActivity): Runnable, MainActivity() {
                 }
 
                 while (UI.getIsConnectionSwitchStateON()) {
-                    val frame : ReastreamFrame = ReastreamFrame()
+                    // local to the loop packet and frame instances
                     val packet = DatagramPacket(buffer, buffer.size)
                     socket.receive(packet)
                     if (isReaStreamFrame(packet))
                     {
+                        val frame : ReastreamFrame = ReastreamFrame()
                         frame.unpackUDPdataStreamtoBuffer(packet)
-                        //Todo pass the audio frame "RSF_frame" to the audio playback listener
                         frameCounter++
                         Log.d(TAG,"$msgPrefix frame [$frameCounter] received = $frame")
-                        //Todo initial test to playback audio data
+                        //Todo Pass the audio frame to the audio playback listener
+                        // todo code to audio here---+++
                     }
                     else{
                         Log.e(TAG,"$msgPrefix not a reastream packet")
                     }
                 }
+
+                 Log.v( TAG, "$msgPrefix UDP receiver stopped by UI.getIsConnectionSwitchStateON() = [${UI.getIsConnectionSwitchStateON()}]")
+                // TODO inform the audio device to disconnect
+
             } catch (e: Exception) {
                 Log.e(TAG, "$msgPrefix catch exception.$e")
                 e.printStackTrace()
             } finally {
                 socket?.close()
             }
-            // Decrease the retry count
-            retryCount -= 1
-            Log.v(TAG,"${Thread.currentThread()}  $msgPrefix Thread remaining retry to connect $retryCount / $maxRetryCount ")
+
+            // Decrease the retry count if the connection switch is turned off
+            if (UI.getIsConnectionSwitchStateON()) {
+                retryCount -= 1
+                Log.v(TAG,"${Thread.currentThread()}  $msgPrefix Thread remaining retry to connect $retryCount / $maxRetryCount ")
+            }
         }
         Log.v(TAG,"${Thread.currentThread()}  $msgPrefix Thread Stopped")
     }
