@@ -19,6 +19,25 @@ import java.io.IOException;
 
 
 public class audioPlaybackExamples {
+    int sampleRateHz = 48000;
+    public void setSampleRateHz(int inSampleRateHz){sampleRateHz =inSampleRateHz;}
+    int numberAudioChannels = 2;
+
+    public void playAudioBuffer(byte[] byteData){
+        // Set and push to audio track..
+        int intSize = AudioTrack.getMinBufferSize(sampleRateHz, AudioFormat.CHANNEL_CONFIGURATION_MONO,AudioFormat.ENCODING_PCM_8BIT);
+        AudioTrack OutputStream = new AudioTrack(AudioManager.STREAM_MUSIC, sampleRateHz, AudioFormat.CHANNEL_CONFIGURATION_MONO,
+                AudioFormat.ENCODING_PCM_8BIT, intSize, AudioTrack.MODE_STREAM);
+        if (OutputStream != null) {
+            OutputStream.play();
+// Write the byte array to the track
+            OutputStream.write(byteData, 0, byteData.length);
+            OutputStream.stop();
+            OutputStream.release();
+        } else
+            Log.d("TCAudio", "audio track is not initialised ");
+    }
+
     public void PlayShortAudioFileViaAudioTrack(String filePath) throws IOException {
 // We keep temporarily filePath globally as we have only two sample sounds now..
         if (filePath == null)
@@ -40,9 +59,9 @@ public class audioPlaybackExamples {
             e.printStackTrace();
         }
 // Set and push to audio track..
-        int intSize = AudioTrack.getMinBufferSize(8000, AudioFormat.CHANNEL_CONFIGURATION_MONO,
+        int intSize = AudioTrack.getMinBufferSize(sampleRateHz, AudioFormat.CHANNEL_CONFIGURATION_MONO,
                 AudioFormat.ENCODING_PCM_8BIT);
-        AudioTrack at = new AudioTrack(AudioManager.STREAM_MUSIC, 8000, AudioFormat.CHANNEL_CONFIGURATION_MONO,
+        AudioTrack at = new AudioTrack(AudioManager.STREAM_MUSIC, sampleRateHz, AudioFormat.CHANNEL_CONFIGURATION_MONO,
                 AudioFormat.ENCODING_PCM_8BIT, intSize, AudioTrack.MODE_STREAM);
         if (at != null) {
             at.play();

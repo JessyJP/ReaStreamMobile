@@ -11,6 +11,7 @@ class ReastreamFrame {
     var numAudioChannels: Int = 2
     var audioSampleRate: Int = 48000
     var sampleSize: Int = 1200
+    var audioSampleBytes : ByteArray = ByteArray(sampleSize)
     var audioSample: IntArray = IntArray(sampleSize / 4)
 
 //        %     typedef struct ReaStream
@@ -46,7 +47,8 @@ class ReastreamFrame {
         sampleSize = toInt32(data.sliceArray(p until p + 2)+ByteArray(2))
         p += 2
 
-        audioSample = convertByteArrayToIntArray(data.sliceArray(p until p + sampleSize))
+        audioSampleBytes = data.sliceArray(p until p + sampleSize)
+        audioSample = convertByteArrayToIntArray(audioSampleBytes)
 
         // TODO do intiger conversion testing
 //        val generatedArray = IntArray(10) { i -> i * i }

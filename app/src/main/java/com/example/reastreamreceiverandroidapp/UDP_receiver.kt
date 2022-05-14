@@ -36,6 +36,8 @@ class UDP_receiver(UI_handle : MainActivity): Runnable, MainActivity() {
         var socket: DatagramSocket? = null
         var buffer = ByteArray(2048)
         var frameCounter = 0
+        // Audio output initialization
+        var audioOutput = audioPlaybackExamples()
 
         // Retry to open the socket
         val maxRetryCount = 100
@@ -62,7 +64,10 @@ class UDP_receiver(UI_handle : MainActivity): Runnable, MainActivity() {
                     Log.d(TAG,"$msgPrefix first packet frame for setup [$frameCounter] received = $firstFrame")
                     // Pass the IP to the UI
                     UI.setHostIPTextView(firstPacket.address.toString())
-                    // TODO Pass the audio device info to the audio playback
+                    // Pass the audio device info to the audio playback
+                    // TODO fix the audio playback class - right now it's lazy initialization
+                    audioOutput.sampleRateHz = firstFrame.audioSampleRate
+                    audioOutput.numberAudioChannels = firstFrame.numAudioChannels
                 }
                 else {
                     Log.d(TAG,"$msgPrefix first packet frame for setup [$frameCounter] received = NOT a ReastreamFrame")
@@ -82,6 +87,7 @@ class UDP_receiver(UI_handle : MainActivity): Runnable, MainActivity() {
                             if(DEBUG)Log.d(TAG, "$msgPrefix frame [$frameCounter] received = $frame")
                             //Todo Pass the audio frame to the audio playback listener
                             // todo code to audio here---+++
+                            audioOutput.playAudioBuffer(frame.audioSampleBytes)
                         }else{
                             Log.d(TAG,"$msgPrefix frame skip because [\"${frame.ReaStreamLabel}\"] != [\"$ListenReaStreamLabel\"]")
                             // TODO include some time delay
