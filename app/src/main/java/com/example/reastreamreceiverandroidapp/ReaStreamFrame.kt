@@ -43,8 +43,8 @@ class ReastreamFrame {
         audioSampleRate = toInt32(data.sliceArray(p until p + 4))
         p += 4
 
-        sampleSize = toInt32(data.sliceArray(p until p + 4))
-        p += 4
+        sampleSize = toInt32(data.sliceArray(p until p + 2)+ByteArray(2))
+        p += 2
 
         audioSample = convertByteArrayToIntArray(data.sliceArray(p until p + sampleSize))
 
@@ -102,6 +102,6 @@ class ReastreamFrame {
     }
 
     override fun toString(): String {
-        return "lbl[$ReaStreamLabel] ch[$numAudioChannels] smpR[$audioSampleRate]Hz data[${audioSample[0]},${audioSample[1]},...] of $sampleSize"
+        return "lbl[$ReaStreamLabel] ch[$numAudioChannels] smpR[$audioSampleRate]Hz SML:$sampleSize of data[${audioSample[0]},...]"
     }
 }
