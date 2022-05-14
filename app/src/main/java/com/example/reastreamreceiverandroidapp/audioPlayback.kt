@@ -58,18 +58,19 @@ class audioPlaybackProcess : Runnable {
 
 
     fun initializeOutputStream() {
-
+//        var audioMode =
+        var audioEncoding: Int = AudioFormat.ENCODING_PCM_FLOAT
         // Set and push to audio track..
         var intSize: Int = AudioTrack.getMinBufferSize(
             sampleRateHz,
             audioChanelConfig(numberAudioChannels),
-            AudioFormat.ENCODING_PCM_32BIT
+            audioEncoding
         )
-        intSize = 1200
+//        intSize = 1200
 
         OutputStream = AudioTrack(
             AudioManager.STREAM_MUSIC, sampleRateHz, audioChanelConfig(numberAudioChannels),
-            AudioFormat.ENCODING_PCM_32BIT, intSize, AudioTrack.MODE_STATIC
+            audioEncoding, intSize, AudioTrack.MODE_STREAM
         )
 
         //TODO change the if statements to TRY CATCH blocks
