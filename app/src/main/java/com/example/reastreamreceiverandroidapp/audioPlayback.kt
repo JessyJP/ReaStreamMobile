@@ -34,7 +34,7 @@ class audioPlaybackProcess : Runnable {
             if (OutputStream != null) {
                 // Write the byte array to the track
                 OutputStream.write(byteData, 0, byteData.size)
-
+                if(DEBUG)Log.d(TAG,msgPrefix+" send ${byteData.size} bytes")
             } else Log.d(TAG, "$msgPrefix audio track stopped in loop ")
         }
 
@@ -47,19 +47,29 @@ class audioPlaybackProcess : Runnable {
         // If the audio properties have been set
         UDP_receiverConnected = true
         propertiesSet_FLAG = true
-
+        Log.d(TAG,msgPrefix+" setAudioPlaybackProperties [$sampleRateHz]Hz Ch[$numberAudioChannels]")
     }
 
+    private fun audioChanelConfig(numAudioChIn:Int): Int  =  when (numAudioChIn) {
+        1 -> AudioFormat.CHANNEL_OUT_MONO
+        2 -> AudioFormat.CHANNEL_OUT_STEREO
+        else -> {AudioFormat.CHANNEL_OUT_STEREO}
+    }
+
+
     fun initializeOutputStream() {
+
         // Set and push to audio track..
-        val intSize = AudioTrack.getMinBufferSize(
+        var intSize: Int = AudioTrack.getMinBufferSize(
             sampleRateHz,
-            AudioFormat.CHANNEL_OUT_STEREO,
-            AudioFormat.ENCODING_PCM_8BIT
+            audioChanelConfig(numberAudioChannels),
+            AudioFormat.ENCODING_PCM_32BIT
         )
+        intSize = 1200
+
         OutputStream = AudioTrack(
-            AudioManager.STREAM_MUSIC, sampleRateHz, AudioFormat.CHANNEL_CONFIGURATION_MONO,
-            AudioFormat.ENCODING_PCM_8BIT, intSize, AudioTrack.MODE_STREAM
+            AudioManager.STREAM_MUSIC, sampleRateHz, audioChanelConfig(numberAudioChannels),
+            AudioFormat.ENCODING_PCM_32BIT, intSize, AudioTrack.MODE_STATIC
         )
 
         //TODO change the if statements to TRY CATCH blocks
@@ -73,6 +83,7 @@ class audioPlaybackProcess : Runnable {
         if (OutputStream != null) {
             // Write the byte array to the track
             OutputStream.write(byteData, 0, byteData.size)
+            if(DEBUG)Log.d(TAG,msgPrefix+" send ${byteData.size} bytes")
 
         } else Log.d(TAG, "$msgPrefix audio track stopped in loop ")
         byteData.drop(byteData.size)

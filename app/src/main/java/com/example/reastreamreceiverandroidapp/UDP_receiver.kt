@@ -128,9 +128,9 @@ class UDP_receiver(UI_handle : MainActivity): Runnable, MainActivity() {
 
     private fun startAudioProcessThread() {
         // todo add a listener check if the thread has already been initialized
-        Log.i(TAG,"Create Audio Playback Process receiver.")
+        Log.i(TAG,msgPrefix+"Create Audio Playback Process receiver.")
         AudioPlaybackProcessThreadWithRunnable = Thread(audioPlaybackProcess())
-        Log.i(TAG,"Start Audio Playback Process in separate thread.")
+        Log.i(TAG,msgPrefix+"Start Audio Playback Process in separate thread.")
         AudioPlaybackProcessThreadWithRunnable.start()
     }
 
