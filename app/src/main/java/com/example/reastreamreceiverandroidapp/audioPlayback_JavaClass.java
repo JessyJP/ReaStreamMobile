@@ -18,7 +18,7 @@ import java.io.IOException;
 
 
 
-public class audioPlaybackExamples {
+public class audioPlayback_JavaClass {
     int sampleRateHz = 48000;
     public void setSampleRateHz(int inSampleRateHz){sampleRateHz =inSampleRateHz;}
     int numberAudioChannels = 2;

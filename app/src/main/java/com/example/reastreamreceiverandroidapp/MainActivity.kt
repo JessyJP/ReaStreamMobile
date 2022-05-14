@@ -22,7 +22,7 @@ import com.google.android.material.textfield.TextInputLayout
 // Debugging tags
 const val TAG    = "ReaStreamReceiver"
 const val sepTxt = "============================================="
-const val DEBUG=true
+const val DEBUG=false
 
 open class MainActivity : AppCompatActivity() {
 
@@ -39,7 +39,7 @@ open class MainActivity : AppCompatActivity() {
     private var controlWebView_top_atStart = 0
 
     //
-    lateinit var  threadWithRunnable : Thread
+    private lateinit var  udpReceiverProcessThreadWithRunnable : Thread
 
     //***+++ Override methods +++***//
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -174,12 +174,12 @@ open class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun startUDPlistner() {
-        // todo add a listener check if the thread has already been initialized
-        Log.i(TAG,"Create UDP receiver.")
-        threadWithRunnable = Thread(UDP_receiver(this))
-        Log.i(TAG,"Start UDP receiver in separate thread.")
-        threadWithRunnable.start()
+    private fun startUDPlistnerProcessThread() {
+        // todo add a listener check if the thread has already been initialized and close it first
+        Log.i(TAG,"Create UDP receiver process.")
+        udpReceiverProcessThreadWithRunnable = Thread(UDP_receiver(this))
+        Log.i(TAG,"Start UDP receiver process in separate thread.")
+        udpReceiverProcessThreadWithRunnable.start()
     }
 
     //***+++ Get & Set Methods +++***//
@@ -206,7 +206,7 @@ open class MainActivity : AppCompatActivity() {
             controlWebView.top = controlWebView_top_atStart - 170*3//dp
 
             // Create the UDP listner
-            startUDPlistner()
+            startUDPlistnerProcessThread()
 
         }
         else {

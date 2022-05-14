@@ -18,14 +18,12 @@ class ReaperHostAddress {
 // Global connection properties initialization
 val ConnectionProperties = ReaperHostAddress()
 
-class UDP_receiver(UI_handle : MainActivity): Runnable, MainActivity() {
+open class UDP_receiver(UI_handle : MainActivity): Runnable, MainActivity() {
     val UI : MainActivity = UI_handle
     var ListenReaStreamLabel : String = UI_handle.getReastreamLabel()
     var audioOutputReady : Boolean  = false
 
-    init{//TODO remove this init block
-        ListenReaStreamLabel = UI_handle.getReastreamLabel()
-    }
+    lateinit var  AudioPlaybackProcessThreadWithRunnable : Thread
 
     override fun run() {
         // Thread callback message ID
@@ -37,7 +35,8 @@ class UDP_receiver(UI_handle : MainActivity): Runnable, MainActivity() {
         var buffer = ByteArray(2048)
         var frameCounter = 0
         // Audio output initialization
-        var audioOutput = audioPlaybackExamples()
+        var audioOutput =
+            audioPlayback_JavaClass()
 
         // Retry to open the socket
         val maxRetryCount = 100
@@ -117,11 +116,16 @@ class UDP_receiver(UI_handle : MainActivity): Runnable, MainActivity() {
         Log.v(TAG,"${Thread.currentThread()}  $msgPrefix Thread Stopped")
     }
 
-
-
     fun isReaStreamFrame(packet : DatagramPacket) : Boolean {
         return (String(packet.data.sliceArray(0..3), StandardCharsets.UTF_8) == "MRSR")
     }
 
+    private fun startAudioProcessThread() {
+        // todo add a listener check if the thread has already been initialized
+        Log.i(TAG,"Create Audio Playback Process receiver.")
+        AudioPlaybackProcessThreadWithRunnable = Thread(audioPlaybackProcess())
+        Log.i(TAG,"Start Audio Playback Process in separate thread.")
+        AudioPlaybackProcessThreadWithRunnable.start()
+    }
 
 }
