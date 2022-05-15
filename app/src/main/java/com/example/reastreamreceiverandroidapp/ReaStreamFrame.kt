@@ -12,7 +12,7 @@ class ReastreamFrame {
     var audioSampleRate: Int = 48000
     var sampleSize: Int = 1200
     var audioSampleBytes : ByteArray = ByteArray(sampleSize)
-    var audioSample: IntArray = IntArray(sampleSize / 4)
+    var audioSample: FloatArray = FloatArray(sampleSize / 4)
 
 //        %     typedef struct ReaStream
 //        %     {
@@ -48,7 +48,7 @@ class ReastreamFrame {
         p += 2
 
         audioSampleBytes = data.sliceArray(p until p + sampleSize)
-        audioSample = convertByteArrayToIntArray(audioSampleBytes)
+        audioSample = convertByteArrayToFloatArray(audioSampleBytes)
 
         // TODO do intiger conversion testing
 //        val generatedArray = IntArray(10) { i -> i * i }
@@ -74,7 +74,7 @@ class ReastreamFrame {
             a.apply {
                 set(
                     i,
-                    v.toByte()
+                    v.toBits().toByte()
                 )
             }
         }
@@ -83,16 +83,16 @@ class ReastreamFrame {
     }
 
 
-    fun convertByteArrayToInt(intBytes: ByteArray): Int {
+    fun convertByteArrayToFloat(intBytes: ByteArray): Float {
         val byteBuffer = ByteBuffer.wrap(intBytes)
-        return byteBuffer.int
+        return byteBuffer.float
     }
 
-    fun convertByteArrayToIntArray(data: ByteArray): IntArray {
+    fun convertByteArrayToFloatArray(data: ByteArray): FloatArray {
 //        if (data == null || data.size % 4 != 0) return null
         // ----------
-        val ints = IntArray(data.size / 4)
-        for (i in ints.indices) ints[i] = convertByteArrayToInt(
+        val floats = FloatArray(data.size / 4)
+        for (i in floats.indices) floats[i] = convertByteArrayToFloat(
             byteArrayOf(
                 data[i * 4],
                 data[i * 4 + 1],
@@ -100,7 +100,7 @@ class ReastreamFrame {
                 data[i * 4 + 3]
             )
         )
-        return ints
+        return floats
     }
 
     override fun toString(): String {
