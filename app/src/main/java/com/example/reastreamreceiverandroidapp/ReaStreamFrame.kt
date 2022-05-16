@@ -5,8 +5,8 @@ import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
 
 class ReastreamFrame {
-    val MRSR: String = "MRSR"
-    var packetSize: Int = 1247
+    private val MRSR: String = "MRSR"
+    private var packetSize: Int = 1247
     var ReaStreamLabel: String = ""
     var numAudioChannels: Int = 2
     var audioSampleRate: Int = 48000
@@ -83,8 +83,8 @@ class ReastreamFrame {
     }
 
 
-    fun convertByteArrayToFloat(intBytes: ByteArray): Float {
-        val byteBuffer = ByteBuffer.wrap(intBytes)
+    fun convertByteArrayToFloat(floatBytes: ByteArray): Float {
+        val byteBuffer = ByteBuffer.wrap(floatBytes)
         return byteBuffer.float
     }
 
