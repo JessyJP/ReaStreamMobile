@@ -10,9 +10,10 @@ class ReastreamFrame {
     var ReaStreamLabel: String = ""
     var numAudioChannels: Int = 2
     var audioSampleRate: Int = 48000
-    var sampleSize: Int = 1200
-    var audioSampleBytes : ByteArray = ByteArray(sampleSize)
-    var audioSample: FloatArray = FloatArray(sampleSize / 4)
+    var sampleByteSize: Int = 1200
+    var audioSampleBytes : ByteArray = ByteArray(sampleByteSize)
+    var numSamples = sampleByteSize/(4*numAudioChannels)
+    var audioSample: FloatArray = FloatArray(sampleByteSize / 4)
 
 //        %     typedef struct ReaStream
 //        %     {
@@ -21,8 +22,8 @@ class ReastreamFrame {
 //        %     char ReastreamLabel[32]; // Name of the stream (ie: default on the plugin) (32 bytes)
 //        %     unsigned int numAudioChannels; // the number of channels the plugin sends (1 byte)
 //        %     unsigned int audioSampleRate; // the rate Frequency of the data (44100, 48000, ...) (4 bytes)
-//        %     unsigned sampleSize; // size of the following bytes to read. (2 bytes)
-//        %     float *datas; // start of the audio datas (variable get from "sampleSize")
+//        %     unsigned sampleByteSize; // size of the following bytes to read. (2 bytes)
+//        %     float *datas; // start of the audio datas (variable get from "sampleByteSize")
 //        %     } ReaStream;
 
 
@@ -44,16 +45,13 @@ class ReastreamFrame {
         audioSampleRate = toInt32(data.sliceArray(p until p + 4))
         p += 4
 
-        sampleSize = toInt32(data.sliceArray(p until p + 2)+ByteArray(2))
+        sampleByteSize = toInt32(data.sliceArray(p until p + 2)+ByteArray(2))
         p += 2
 
-        audioSampleBytes = data.sliceArray(p until p + sampleSize)
+        audioSampleBytes = data.sliceArray(p until p + sampleByteSize)
         audioSample = convertByteArrayToFloatArray(audioSampleBytes)
 
-        // TODO do intiger conversion testing
-//        val generatedArray = IntArray(10) { i -> i * i }
-//        val numbers: IntArray = intArrayOf(10, 20, 30, 40, 50)
-// todo remove this here
+        numSamples = sampleByteSize/(4*numAudioChannels)
     }
 
     // TODO Eventually those conversion routines should be made in the most optimized and fast and efficient way possible
@@ -82,10 +80,9 @@ class ReastreamFrame {
         return data
     }
 
-
     fun convertByteArrayToFloat(floatBytes: ByteArray): Float {
-        val byteBuffer = ByteBuffer.wrap(floatBytes)
-        return byteBuffer.float
+        floatBytes.reverse()
+        return ByteBuffer.wrap(floatBytes).float
     }
 
     fun convertByteArrayToFloatArray(data: ByteArray): FloatArray {
@@ -104,6 +101,6 @@ class ReastreamFrame {
     }
 
     override fun toString(): String {
-        return "lbl[$ReaStreamLabel] ch[$numAudioChannels] smpR[$audioSampleRate]Hz SML:$sampleSize of data[${audioSample[0]},...]"
+        return "lbl[$ReaStreamLabel] ch[$numAudioChannels] smpR[$audioSampleRate]Hz SML:${numSamples} of data[${audioSample[0]},...]"
     }
 }

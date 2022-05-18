@@ -66,7 +66,6 @@ class audioPlaybackProcess : Runnable {
             audioChanelConfig(numberAudioChannels),
             audioEncoding
         )
-//        intSize = 1200
 
         OutputStream = AudioTrack(
             AudioManager.STREAM_MUSIC, sampleRateHz, audioChanelConfig(numberAudioChannels),
@@ -80,14 +79,12 @@ class audioPlaybackProcess : Runnable {
     }
 
     fun playAudioBuffer(frame: ReastreamFrame) {
-        byteData = frame.audioSampleBytes
         if (OutputStream != null) {
             // Write the byte array to the track
-            OutputStream.write(byteData, 0, byteData.size)
-            if(DEBUG)Log.d(TAG,msgPrefix+" send ${byteData.size} bytes")
+            OutputStream.write(frame.audioSample, 0, frame.numSamples,AudioTrack.WRITE_NON_BLOCKING)
+            if(DEBUG)Log.d(TAG,msgPrefix+" Play ${frame.sampleByteSize} bytes as ${frame.numSamples}")
 
         } else Log.d(TAG, "$msgPrefix audio track stopped in loop ")
-        byteData.drop(byteData.size)
     }
 
 

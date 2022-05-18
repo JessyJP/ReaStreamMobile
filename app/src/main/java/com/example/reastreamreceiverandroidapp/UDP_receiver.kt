@@ -63,7 +63,11 @@ class UDP_receiver(UI_handle : MainActivity): Runnable, MainActivity() {
                 if (isReaStreamFrame(firstPacket)) {
                     val firstFrame: ReastreamFrame = ReastreamFrame()
                     firstFrame.unpackUDPdataStreamtoBuffer(firstPacket)
-                    // TODO should I filter by reastream label here too
+                    // Check if the label matches
+                    if (!(firstFrame.ReaStreamLabel == ListenReaStreamLabel)) {
+                        Log.d(TAG,"$msgPrefix frame skip because [\"${firstFrame.ReaStreamLabel}\"] != [\"$ListenReaStreamLabel\"]")
+                        continue
+                    }
                     Log.d(TAG,"$msgPrefix first packet frame for setup [$frameCounter] received = $firstFrame")
                     // Pass the IP to the UI
                     UI.setHostIPTextView(firstPacket.address.toString())
