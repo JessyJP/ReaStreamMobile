@@ -22,7 +22,7 @@ import com.google.android.material.textfield.TextInputLayout
 // Debugging tags
 const val TAG    = "ReaStreamReceiver"
 const val sepTxt = "============================================="
-const val DEBUG=true
+const val DEBUG=false
 
 open class MainActivity : AppCompatActivity() {
 

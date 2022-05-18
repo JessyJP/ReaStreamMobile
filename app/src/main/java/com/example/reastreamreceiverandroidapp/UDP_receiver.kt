@@ -34,7 +34,7 @@ class UDP_receiver(UI_handle : MainActivity): Runnable, MainActivity() {
 
         // Define all the variables and classes
         var socket: DatagramSocket? = null
-        var buffer = ByteArray(2048)
+        var buffer = ByteArray(65536)
         var frameCounter = 0
 
         // Audio output initialization as a separate process
