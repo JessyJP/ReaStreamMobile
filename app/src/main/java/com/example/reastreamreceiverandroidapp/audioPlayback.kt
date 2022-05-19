@@ -1,5 +1,6 @@
 package com.example.reastreamreceiverandroidapp
 
+import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioManager
 import android.media.AudioTrack
@@ -61,7 +62,7 @@ class audioPlaybackProcess : Runnable {
 //        var audioMode =
         var audioEncoding: Int = AudioFormat.ENCODING_PCM_FLOAT
         // Set and push to audio track..
-        var intSize: Int = AudioTrack.getMinBufferSize(
+        var minAudioBufferSize: Int = AudioTrack.getMinBufferSize(
             sampleRateHz,
             audioChanelConfig(numberAudioChannels),
             audioEncoding
@@ -69,8 +70,25 @@ class audioPlaybackProcess : Runnable {
 
         OutputStream = AudioTrack(
             AudioManager.STREAM_MUSIC, sampleRateHz, audioChanelConfig(numberAudioChannels),
-            audioEncoding, intSize, AudioTrack.MODE_STREAM
+            audioEncoding, minAudioBufferSize, AudioTrack.MODE_STREAM
         )
+
+        OutputStream = AudioTrack.Builder()
+            .setAudioAttributes(
+                AudioAttributes.Builder()
+//                    .setUsage(AudioAttributes.USAGE_ALARM)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                    .build()
+            )
+            .setAudioFormat(
+                AudioFormat.Builder()
+                    .setEncoding(audioEncoding)
+                    .setSampleRate(sampleRateHz)
+                    .setChannelMask(audioChanelConfig(numberAudioChannels))
+                    .build()
+            )
+            .setBufferSizeInBytes(minAudioBufferSize)
+            .build()
 
         //TODO change the if statements to TRY CATCH blocks
         if (OutputStream != null) {
@@ -78,15 +96,34 @@ class audioPlaybackProcess : Runnable {
         } else Log.d(TAG, "$msgPrefix audio track is not initialised ")
     }
 
-    fun playAudioBuffer(frame: ReastreamFrame) {
+    fun playAudioBuffer(F: ReastreamFrame) {
+        F.audioSample = audioBufferReorder(F)// TODO reorder frame may be needed
         if (OutputStream != null) {
             // Write the byte array to the track
-            OutputStream.write(frame.audioSample, 0, frame.numSamples,AudioTrack.WRITE_NON_BLOCKING)
-            if(DEBUG)Log.d(TAG,msgPrefix+" Play ${frame.sampleByteSize} bytes as ${frame.numSamples}")
+            OutputStream.write(
+                F.audioSample,
+                0,
+                F.numSamples,
+                AudioTrack.WRITE_NON_BLOCKING
+            )
+            if(DEBUG)Log.d(TAG,msgPrefix+" Play ${F.sampleByteSize} bytes as ${F.numSamples}")
 
         } else Log.d(TAG, "$msgPrefix audio track stopped in loop ")
     }
 
+    fun audioBufferReorder(F: ReastreamFrame): FloatArray{
+        var buffer = FloatArray(F.audioSample.size)
+        var chSampLen = F.audioSample.size / F.numAudioChannels
+        for (ch in 0 until F.numAudioChannels) {
+            for (s in 0 until chSampLen) {
+                buffer[s*F.numAudioChannels+ch] = F.audioSample[s+ch*chSampLen]
+            }
+        }
+
+        // TODO TEST
+        buffer = F.audioSample.take(chSampLen).toFloatArray()
+        return buffer
+    }
 
     fun closeOutputStream() {
         if (OutputStream != null) {
