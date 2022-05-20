@@ -23,6 +23,7 @@ import com.google.android.material.textfield.TextInputLayout
 const val TAG    = "ReaStreamReceiver"
 const val sepTxt = "============================================="
 const val DEBUG=false
+val UI_PROFILES = arrayOf("activity_main", "profile1")
 
 open class MainActivity : AppCompatActivity() {
 
@@ -45,11 +46,9 @@ open class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.i(TAG,sepTxt)
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        Log.i(TAG,"ReaStream Android app Main Activity Started")
 
         //on creation initialize the handles to the UI elements
-        initializeHandles()
+        initializeSetContentViewAndHandles(UI_PROFILES[1])
 
         //connection Setup
         preConnectionSetup()
@@ -63,18 +62,38 @@ open class MainActivity : AppCompatActivity() {
 
     //***+++ Internal control methods +++***//
 
-    // Initialize UI element handles and loading of the web control page
-    private fun initializeHandles() {
-        Log.i(TAG,"Initialize UI handles")
-        // Create handles on initial loading of the app
-        ip_addressView =  findViewById(R.id.serverIP_portInputView)
-        connectionSwitchView = findViewById(R.id.switchConnect)
-        reastreamLabelView = findViewById(R.id.reastreamLabelInputView)
-        outputDeviceListView = findViewById(R.id.outputDeviceListView)
-        inputDeviceListView = findViewById(R.id.inputDeviceListView)
-        controlWebView = findViewById(R.id.webControlView)
-        controlURLView = findViewById(R.id.webControlURLinputView)
+    fun getViewID(ProfileName: String,id:String):Int { return resources.getIdentifier("${id}_$ProfileName", "id", packageName)}
 
+    // Initialize UI element handles and loading of the web control page
+    private fun initializeSetContentViewAndHandles(ProfileName:String = UI_PROFILES[0]) {
+
+        if (UI_PROFILES[0] != ProfileName){
+            setContentView(R.layout.activity_main_profile1)//TODO this has to be acquired by a string
+            Log.i(TAG,"ReaStream Android app Main Activity Started with [$ProfileName]")
+
+            // Create handles on initial loading of the app
+            ip_addressView       = findViewById(getViewID(ProfileName,"serverIP_portInputView"))
+            connectionSwitchView = findViewById(getViewID(ProfileName,"switchConnect"))
+            reastreamLabelView   = findViewById(getViewID(ProfileName,"reastreamLabelInputView"))
+            outputDeviceListView = findViewById(getViewID(ProfileName,"outputDeviceListView"))
+            inputDeviceListView  = findViewById(getViewID(ProfileName,"inputDeviceListView"))
+            controlWebView       = findViewById(getViewID(ProfileName,"webControlView"))
+            controlURLView       = findViewById(getViewID(ProfileName,"webControlURLinputView"))
+        }
+        else {
+            setContentView(R.layout.activity_main)
+            Log.i(TAG,"ReaStream Android app Main Activity Started")
+
+            // Create handles on initial loading of the app
+            ip_addressView       = findViewById(R.id.serverIP_portInputView)
+            connectionSwitchView = findViewById(R.id.switchConnect)
+            reastreamLabelView   = findViewById(R.id.reastreamLabelInputView)
+            outputDeviceListView = findViewById(R.id.outputDeviceListView)
+            inputDeviceListView  = findViewById(R.id.inputDeviceListView)
+            controlWebView       = findViewById(R.id.webControlView)
+            controlURLView       = findViewById(R.id.webControlURLinputView)
+        }
+        Log.i(TAG, "Initialize UI handles with [$ProfileName]")
     }
 
     // Pre connection setup
