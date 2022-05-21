@@ -19,12 +19,12 @@ class ReaperHostAddress {
 // Global connection properties initialization
 val ConnectionProperties = ReaperHostAddress()
 
-class UDP_receiver(UI_handle : MainActivity): Runnable, MainActivity() {
+open class UDP_receiver(UI_handle : MainActivity): Runnable, MainActivity() {
     val UI : MainActivity = UI_handle
     var ListenReaStreamLabel : String = UI_handle.getReastreamLabel()
     var audioOutputReady : Boolean  = false
 
-    private val msgPrefix = "UDP Receiver:"
+    protected val msgPrefix = "UDP Receiver:"
 
     lateinit var  AudioPlaybackProcessThreadWithRunnable : Thread
 

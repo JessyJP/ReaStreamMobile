@@ -6,7 +6,7 @@ import android.media.AudioManager
 import android.media.AudioTrack
 import android.util.Log
 
-class audioPlaybackProcess : Runnable {
+open class audioPlaybackProcess : Runnable {
     val msgPrefix = "Audio Playback:"
     private var UDP_receiverConnected : Boolean = false
 
@@ -96,7 +96,7 @@ class audioPlaybackProcess : Runnable {
         } else Log.d(TAG, "$msgPrefix audio track is not initialised ")
     }
 
-    fun playAudioBuffer(F: ReastreamFrame) {
+    open fun playAudioBuffer(F: ReastreamFrame) {
         F.audioSample = audioBufferReorder(F)// TODO reorder frame may be needed
         if (OutputStream != null) {
             // Write the byte array to the track
