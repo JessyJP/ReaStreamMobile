@@ -17,7 +17,9 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
 import com.google.android.material.textfield.TextInputLayout
+
 
 // Debugging tags
 const val TAG    = "ReaStreamReceiver"
@@ -26,6 +28,11 @@ const val DEBUG=false
 val UI_PROFILES = arrayOf("activity_main", "profile1")
 
 open class MainActivity : AppCompatActivity() {
+    // Debug message prefix
+    private val msgPrefix = "Main Activity (UI):"
+
+    // UI Setup Layout
+    private var setupLayout:Int = 0
 
     // UI Element handles
     private lateinit var ip_addressView: TextInputLayout
@@ -48,7 +55,7 @@ open class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         //on creation initialize the handles to the UI elements
-        initializeSetContentViewAndHandles(UI_PROFILES[1])
+        initializeSetContentViewAndHandles(UI_PROFILES[0])
 
         //connection Setup
         preConnectionSetup()
@@ -68,8 +75,9 @@ open class MainActivity : AppCompatActivity() {
     private fun initializeSetContentViewAndHandles(ProfileName:String = UI_PROFILES[0]) {
 
         if (UI_PROFILES[0] != ProfileName){
-            setContentView(R.layout.activity_main_profile1)//TODO this has to be acquired by a string
-            Log.i(TAG,"ReaStream Android app Main Activity Started with [$ProfileName]")
+            setupLayout = R.layout.activity_main_profile1//TODO this has to be acquired by a string
+            setContentView(setupLayout)
+            Log.i(TAG,msgPrefix+"ReaStream Android app Main Activity Started with [$ProfileName]")
 
             // Create handles on initial loading of the app
             ip_addressView       = findViewById(getViewID(ProfileName,"serverIP_portInputView"))
@@ -81,8 +89,9 @@ open class MainActivity : AppCompatActivity() {
             controlURLView       = findViewById(getViewID(ProfileName,"webControlURLinputView"))
         }
         else {
-            setContentView(R.layout.activity_main)
-            Log.i(TAG,"ReaStream Android app Main Activity Started")
+            setupLayout = R.layout.activity_main
+            setContentView(setupLayout)
+            Log.i(TAG,msgPrefix+"ReaStream Android app Main Activity Started")
 
             // Create handles on initial loading of the app
             ip_addressView       = findViewById(R.id.serverIP_portInputView)
@@ -93,17 +102,17 @@ open class MainActivity : AppCompatActivity() {
             controlWebView       = findViewById(R.id.webControlView)
             controlURLView       = findViewById(R.id.webControlURLinputView)
         }
-        Log.i(TAG, "Initialize UI handles with [$ProfileName]")
+        Log.i(TAG,msgPrefix+"Initialize UI handles with [$ProfileName]")
     }
 
     // Pre connection setup
     private fun preConnectionSetup() {
-        Log.i(TAG,"Do pre connection setup")
+        Log.i(TAG,msgPrefix+"Do pre connection setup")
         // Enable javaScript
-        Log.i(TAG,"controlWebView.settings.javaScriptEnabled = true")
+        Log.i(TAG,msgPrefix+"controlWebView.settings.javaScriptEnabled = true")
         controlWebView.settings.javaScriptEnabled = true
         // Create a web view for the web control page
-        Log.i(TAG,"Create web client")
+        Log.i(TAG,msgPrefix+"Create web client")
         controlWebView.webViewClient = WebViewClient()
         // Load the web control page
         loadWebControlPage()
@@ -114,7 +123,7 @@ open class MainActivity : AppCompatActivity() {
 
     // Load the web control web page
     private fun loadWebControlPage() {
-        Log.i(TAG,"Load the web control web page")
+        Log.i(TAG,msgPrefix+"Load the web control web page")
         val url: String = controlURLView.text.toString()
         controlWebView.loadUrl(url)
     }
@@ -122,33 +131,33 @@ open class MainActivity : AppCompatActivity() {
     // Get the available audio device
     private fun getAudioDevices() {
         // Get audio devices
-        Log.i(TAG,"Initialize the audio manager")
+        Log.i(TAG,msgPrefix+"Initialize the audio manager")
         val audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
 
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             var ListAudioDevices = audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)+ audioManager.getDevices(AudioManager.GET_DEVICES_INPUTS)
             Log.i(TAG,sepTxt.replace("=","-"))
-            Log.i(TAG,"Show Audio devices:")
+            Log.i(TAG,msgPrefix+"Show Audio devices:")
             //  Print the device info
             for (dev in ListAudioDevices) {
                 Log.i(
-                    TAG,
+                    TAG,msgPrefix+
                     dev.productName.toString() + " " +
                             "IN[" + dev.isSink + "]  " +
                             "OUT[" + dev.isSource + "] "
                 )
                 for (ch in dev.channelCounts) {
-                    Log.i(TAG, "    + Ch[" + ch + "]) ")
+                    Log.i(TAG,msgPrefix+ "    + Ch[" + ch + "]) ")
                 }
                 for (sr in dev.sampleRates) {
-                    Log.i(TAG, "        + SR[$sr]Hz ")
+                    Log.i(TAG,msgPrefix+ "        + SR[$sr]Hz ")
                 }
             }
             Log.i(TAG,sepTxt.replace("=","-"))
         }
 
-        Log.i(TAG,"Populate the spinner entries with the audio device data")
+        Log.i(TAG,msgPrefix+"Populate the spinner entries with the audio device data")
         // Create an ArrayAdapter using the string array and a default spinner layout
         ArrayAdapter.createFromResource(
             this,
@@ -195,9 +204,9 @@ open class MainActivity : AppCompatActivity() {
 
     private fun startUDPlistnerProcessThread() {
         // todo add a listener check if the thread has already been initialized and close it first
-        Log.i(TAG,"Create UDP receiver process.")
+        Log.i(TAG,msgPrefix+"Create UDP receiver process.")
         udpReceiverProcessThreadWithRunnable = Thread(UDP_receiver(this))
-        Log.i(TAG,"Start UDP receiver process in separate thread.")
+        Log.i(TAG,msgPrefix+"Start UDP receiver process in separate thread.")
         udpReceiverProcessThreadWithRunnable.start()
     }
 
@@ -216,33 +225,25 @@ open class MainActivity : AppCompatActivity() {
 
     // Connection callback function
     fun onSwitchToggleCb(view: View) {
-        // TODO include debug messages in this function
-        // Check if all inputs are there.
-        if (controlWebView_top_atStart == 0){controlWebView_top_atStart = controlWebView.top}
-        // Get the switch position
-//        var isConnected:Boolean =
+        // Based on the switch position
         if (connectionSwitchView.isChecked){
-            controlWebView.top = controlWebView_top_atStart - 170*3//dp
 
             // Create the UDP listner
             startUDPlistnerProcessThread()
 
+            val params = controlWebView.layoutParams as ConstraintLayout.LayoutParams
+                params.topToBottom = ip_addressView.id
+//                params.topMargin = 10
+                  controlWebView.requestLayout()
+            Log.d(TAG, "$msgPrefix Switch to connected view layout/constraint")
+
         }
         else {
-            controlWebView.top = controlWebView_top_atStart
+            val params = controlWebView.layoutParams as ConstraintLayout.LayoutParams
+            params.topToBottom = controlURLView.id
+            controlWebView.requestLayout()
+            Log.d(TAG, "$msgPrefix Switch to disconnected view layout/constraint")
         }
-
-
-
-//        connectionSwitchView.setOnCheckedChangeListener { buttonView, isChecked ->
-//            if (isChecked) {
-//                // The toggle is enabled
-//            } else {
-//                // The toggle is disabled
-//            }
-//        }
-
-
     }
 
     fun onControlURLChangeCb(view: View) {
