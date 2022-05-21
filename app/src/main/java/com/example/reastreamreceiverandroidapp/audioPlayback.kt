@@ -120,8 +120,8 @@ class audioPlaybackProcess : Runnable {
             }
         }
 
-        // TODO TEST
-        buffer = F.audioSample.take(chSampLen).toFloatArray()
+//        // Trim
+//        buffer = F.audioSample.take(chSampLen).toFloatArray()
         return buffer
     }
 

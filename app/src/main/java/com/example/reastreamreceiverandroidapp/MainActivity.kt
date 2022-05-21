@@ -55,17 +55,21 @@ open class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         //on creation initialize the handles to the UI elements
-        initializeSetContentViewAndHandles(UI_PROFILES[0])
+        initializeSetContentViewAndHandles(UI_PROFILES[1])
 
         //connection Setup
         preConnectionSetup()
 
     }
 
-//    override fun onDestroy() {
-//        // Call super on destroy
-//        super.onDestroy();
-//    }
+    override fun onDestroy() {
+        // TODO this can determine if it will be Kept in the back ground
+        // First Disconnect
+        connectionSwitchView.isChecked = false
+
+        // Call super on destroy
+        super.onDestroy()
+    }
 
     //***+++ Internal control methods +++***//
 
