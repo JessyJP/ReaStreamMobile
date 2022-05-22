@@ -50,7 +50,7 @@ open class UDP_receiver(UI_handle : MainActivity): Runnable, MainActivity() {
         while (retryCount > 0 && UI.getIsConnectionSwitchStateON()){
              try {
                 //Keep a socket open to listen to all the UDP trafic that is destined for this port
-                socket = DatagramSocket(ConnectionProperties.port)//, InetAddress.getByName(ConnectionProperties.hostIP)
+                socket = DatagramSocket_fromFileTest(ConnectionProperties.port,UI)//, InetAddress.getByName(ConnectionProperties.hostIP)
                 socket.broadcast = true// TODO check if the broadcast is needed to get from all IPs on this port
 
                 // First packet used for setup of the audio device
