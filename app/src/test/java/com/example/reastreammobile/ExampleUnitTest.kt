@@ -1,4 +1,4 @@
-package com.example.reastreamreceiverandroidapp
+package com.example.reastreammobile
 
 import org.junit.Test
 

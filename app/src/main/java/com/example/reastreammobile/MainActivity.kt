@@ -1,4 +1,4 @@
-package com.example.reastreamreceiverandroidapp
+package com.example.reastreammobile
 
 // OS import
 // UI view elements
@@ -22,7 +22,7 @@ import com.google.android.material.textfield.TextInputLayout
 
 
 // Debugging tags
-const val TAG    = "ReaStreamReceiver"
+const val TAG    = "ReaStreamMobile"
 const val sepTxt = "============================================="
 const val DEBUG=false
 val UI_PROFILES = arrayOf("activity_main", "profile1")

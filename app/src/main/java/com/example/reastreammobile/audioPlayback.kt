@@ -1,4 +1,4 @@
-package com.example.reastreamreceiverandroidapp
+package com.example.reastreammobile
 
 import android.media.AudioAttributes
 import android.media.AudioFormat

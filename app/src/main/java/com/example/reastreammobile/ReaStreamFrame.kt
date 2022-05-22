@@ -1,4 +1,4 @@
-package com.example.reastreamreceiverandroidapp
+package com.example.reastreammobile
 
 import java.net.DatagramPacket
 import java.nio.ByteBuffer

@@ -1,4 +1,4 @@
-package com.example.reastreamreceiverandroidapp
+package com.example.reastreammobile
 
 class UDP_transmitter(UI_handle : MainActivity): Runnable, MainActivity() {
     val UI : MainActivity = UI_handle
