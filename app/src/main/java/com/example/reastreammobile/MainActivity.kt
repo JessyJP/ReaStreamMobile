@@ -37,7 +37,8 @@ open class MainActivity : AppCompatActivity() {
 
     // UI Element handles
     private lateinit var ip_addressView: TextInputLayout
-    private lateinit var connectionSwitchView: SwitchCompat
+    private lateinit var receiverSwitchView: SwitchCompat
+    private lateinit var transmitterSwitchView: SwitchCompat
     private lateinit var reastreamLabelView: EditText
     private lateinit var outputDeviceListView: Spinner
     private lateinit var inputDeviceListView: Spinner
@@ -64,7 +65,8 @@ open class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         // TODO this can determine if it will be Kept in the back ground
         // First Disconnect
-        connectionSwitchView.isChecked = false
+        receiverSwitchView.isChecked    = false
+        transmitterSwitchView.isChecked = false
 
         // Call super on destroy
         super.onDestroy()
@@ -83,13 +85,14 @@ open class MainActivity : AppCompatActivity() {
             Log.i(TAG,msgPrefix+"ReaStream Android app Main Activity Started with [$ProfileName]")
 
             // Create handles on initial loading of the app
-            ip_addressView       = findViewById(getViewID(ProfileName,"serverIP_portView"))
-            connectionSwitchView = findViewById(getViewID(ProfileName,"switchConnectReceiver"))
-            reastreamLabelView   = findViewById(getViewID(ProfileName,"reastreamReceiverFrameLabelView"))
-            outputDeviceListView = findViewById(getViewID(ProfileName,"outputDeviceListView"))
-            inputDeviceListView  = findViewById(getViewID(ProfileName,"inputDeviceListView"))
-            controlWebView       = findViewById(getViewID(ProfileName,"webControlView"))
-            controlURLView       = findViewById(getViewID(ProfileName,"webControlURLinputView"))
+            ip_addressView        = findViewById(getViewID(ProfileName,"serverIP_portView"))
+            receiverSwitchView    = findViewById(getViewID(ProfileName,"switchConnectReceiver"))
+            transmitterSwitchView = findViewById(getViewID(ProfileName,"switchConnectTransmitter"))
+            reastreamLabelView    = findViewById(getViewID(ProfileName,"reastreamReceiverFrameLabelView"))
+            outputDeviceListView  = findViewById(getViewID(ProfileName,"outputDeviceListView"))
+            inputDeviceListView   = findViewById(getViewID(ProfileName,"inputDeviceListView"))
+            controlWebView        = findViewById(getViewID(ProfileName,"webControlView"))
+            controlURLView        = findViewById(getViewID(ProfileName,"webControlURLinputView"))
         }
         else {
             setupLayout = R.layout.activity_main
@@ -97,13 +100,14 @@ open class MainActivity : AppCompatActivity() {
             Log.i(TAG,msgPrefix+"ReaStream Android app Main Activity Started")
 
             // Create handles on initial loading of the app
-            ip_addressView       = findViewById(R.id.serverIP_portView)
-            connectionSwitchView = findViewById(R.id.switchConnectReceiver)
-            reastreamLabelView   = findViewById(R.id.reastreamReceiverFrameLabelView)
-            outputDeviceListView = findViewById(R.id.outputDeviceListView)
-            inputDeviceListView  = findViewById(R.id.inputDeviceListView)
-            controlWebView       = findViewById(R.id.webControlView)
-            controlURLView       = findViewById(R.id.webControlURLinputView)
+            ip_addressView        = findViewById(R.id.serverIP_portView)
+            receiverSwitchView    = findViewById(R.id.switchConnectReceiver)
+            transmitterSwitchView = findViewById(R.id.switchConnectTransmitter)
+            reastreamLabelView    = findViewById(R.id.reastreamReceiverFrameLabelView)
+            outputDeviceListView  = findViewById(R.id.outputDeviceListView)
+            inputDeviceListView   = findViewById(R.id.inputDeviceListView)
+            controlWebView        = findViewById(R.id.webControlView)
+            controlURLView        = findViewById(R.id.webControlURLinputView)
         }
         Log.i(TAG,msgPrefix+"Initialize UI handles with [$ProfileName]")
     }
@@ -220,8 +224,19 @@ open class MainActivity : AppCompatActivity() {
         ip_addressView.hint = hostIP
     }
 
-    fun getIsConnectionSwitchStateON(): Boolean{
-        return connectionSwitchView.isChecked
+    fun getIsReceiverSwitchStateON(): Boolean{
+        return receiverSwitchView.isChecked
+    }
+
+    internal fun setReceiverConnectionSwitchState(state: Boolean){
+//        receiverSwitchView.check
+        //todo finish this function
+        if (state){}
+        else
+        {
+
+            Log.d(TAG, "$msgPrefix The receiver connection switch state is reset.")
+        }
     }
 
     //***+++ Callback functions section +++***//
@@ -229,7 +244,7 @@ open class MainActivity : AppCompatActivity() {
     // Connection callback function
     fun onSwitchToggleCb(view: View) {
         // Based on the switch position
-        if (connectionSwitchView.isChecked){
+        if (receiverSwitchView.isChecked){
 
             // Create the UDP listner
             startUDPlistnerProcessThread()

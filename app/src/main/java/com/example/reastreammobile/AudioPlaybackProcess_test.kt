@@ -57,14 +57,14 @@ class AudioPlaybackProcess_test : AudioPlaybackProcess() {
         var audioEncoding: Int = AudioFormat.ENCODING_PCM_FLOAT
         // Set and push to audio track..
         var minAudioBufferSize: Int = AudioTrack.getMinBufferSize(
-            sampleRateHz,
+            samplingRateHz,
             audioChanelConfig(numberAudioChannels),
             audioEncoding
         )
-        minAudioBufferSize = sampleRateHz*10*4*numberAudioChannels
+        minAudioBufferSize = samplingRateHz*10*4*numberAudioChannels
 
         OutputStream = AudioTrack(
-            AudioManager.STREAM_MUSIC, sampleRateHz, audioChanelConfig(numberAudioChannels),
+            AudioManager.STREAM_MUSIC, samplingRateHz, audioChanelConfig(numberAudioChannels),
             audioEncoding, minAudioBufferSize, AudioTrack.MODE_STREAM
         )
 
@@ -78,7 +78,7 @@ class AudioPlaybackProcess_test : AudioPlaybackProcess() {
             .setAudioFormat(
                 AudioFormat.Builder()
                     .setEncoding(audioEncoding)
-                    .setSampleRate(sampleRateHz)
+                    .setSampleRate(samplingRateHz)
                     .setChannelMask(audioChanelConfig(numberAudioChannels))
                     .build()
             )

@@ -59,7 +59,7 @@ open class UDP_receiver(UI_handle : MainActivity): Runnable, MainActivity() {
         var retryCount = maxRetryCount
 
         // Inside the loop is the effective receive UDP packet callback
-        while (retryCount > 0 && UI.getIsConnectionSwitchStateON()){
+        while (retryCount > 0 && UI.getIsReceiverSwitchStateON()){
             try {
                 //Keep a socket open to listen to all the UDP trafic that is destined for this port
                 socket = DatagramSocket(ConnectionProperties.port)//, InetAddress.getByName(ConnectionProperties.hostIP)
@@ -95,7 +95,7 @@ open class UDP_receiver(UI_handle : MainActivity): Runnable, MainActivity() {
                     continue
                 }
 
-                while (UI.getIsConnectionSwitchStateON()) {
+                while (UI.getIsReceiverSwitchStateON()) {
                     // local to the loop packet and frame instances
                     val packet = DatagramPacket(buffer, buffer.size)
                     socket.receive(packet)
@@ -119,7 +119,7 @@ open class UDP_receiver(UI_handle : MainActivity): Runnable, MainActivity() {
                     }
                 }
 
-                 Log.v( TAG, "$msgPrefix UDP receiver stopped by UI.getIsConnectionSwitchStateON() = [${UI.getIsConnectionSwitchStateON()}]")
+                 Log.v( TAG, "$msgPrefix UDP receiver stopped by UI.getIsReceiverSwitchStateON() = [${UI.getIsReceiverSwitchStateON()}]")
                 // TODO inform the audio device to disconnect
                  audioOutput.closeOutputStream()
             } catch (e: Exception) {
@@ -130,19 +130,20 @@ open class UDP_receiver(UI_handle : MainActivity): Runnable, MainActivity() {
             }
 
             // Decrease the retry count if the connection switch is turned off
-            if (UI.getIsConnectionSwitchStateON()) {
+            if (UI.getIsReceiverSwitchStateON()) {
                 retryCount -= 1
                 Log.v(TAG,"${Thread.currentThread()}  $msgPrefix Thread remaining retry to connect $retryCount / $maxRetryCount ")
                 // Pause execution and wait a little
                 sleep(100)
             }
         }
-        Log.v(TAG,"${Thread.currentThread()}  $msgPrefix Thread Stopped")
+        Log.v(TAG,"${Thread.currentThread()}  $msgPrefix Thread Stopped")// Todo is it really stopped or just he run function has finisheed
     }
 
     override fun onDestroy(){
         // Just in case close this
-        socket_out?.close()
+        socket_out?.close()// propbably unnecessary because there is time out// todo maybe remove "socket out later
+        UI.setReceiverConnectionSwitchState(false)
         super.onDestroy()
 
     }
