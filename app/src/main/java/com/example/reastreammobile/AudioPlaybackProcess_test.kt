@@ -6,8 +6,8 @@ import android.media.AudioManager
 import android.media.AudioTrack
 import android.util.Log
 
-// TODO to test "audioPlaybackProcess" the class is made open
-class audioPlaybackProcess_test : audioPlaybackProcess() {
+// TODO to test "AudioPlaybackProcess" the class is made open
+class AudioPlaybackProcess_test : AudioPlaybackProcess() {
     val Frames: ArrayList<ReastreamFrame> = ArrayList<ReastreamFrame>(500)
 
 //    override fun playAudioBuffer(F: ReastreamFrame) {

@@ -8,7 +8,7 @@ import java.net.InetAddress
 
 class DatagramSocket_fromFileTest(port: Int = 58710, UI_handle : MainActivity) : DatagramSocket(port) {
     val UI : MainActivity = UI_handle
-    val ins: InputStream = UI.resources.openRawResource(R.raw.testsong2)
+    val ins: InputStream = UI.resources.openRawResource(R.raw.testsong1)
     // Alternative way
 //        var ins: InputStream = UI.resources.openRawResource(
 //            UI.resources.getIdentifier(

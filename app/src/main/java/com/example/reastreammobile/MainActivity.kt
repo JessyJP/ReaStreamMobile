@@ -17,6 +17,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SwitchCompat
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.google.android.material.textfield.TextInputLayout
 
@@ -36,17 +37,15 @@ open class MainActivity : AppCompatActivity() {
 
     // UI Element handles
     private lateinit var ip_addressView: TextInputLayout
-    private lateinit var connectionSwitchView: Switch
+    private lateinit var connectionSwitchView: SwitchCompat
     private lateinit var reastreamLabelView: EditText
     private lateinit var outputDeviceListView: Spinner
     private lateinit var inputDeviceListView: Spinner
     private lateinit var controlURLView: TextView
     private lateinit var controlWebView: WebView
 
-    // Internal variables
-    private var controlWebView_top_atStart = 0
 
-    //
+    // Thread
     private lateinit var  udpReceiverProcessThreadWithRunnable : Thread
 
     //***+++ Override methods +++***//
@@ -55,7 +54,7 @@ open class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         //on creation initialize the handles to the UI elements
-        initializeSetContentViewAndHandles(UI_PROFILES[1])
+        initializeSetContentViewAndHandles(UI_PROFILES[0])
 
         //connection Setup
         preConnectionSetup()
@@ -84,9 +83,9 @@ open class MainActivity : AppCompatActivity() {
             Log.i(TAG,msgPrefix+"ReaStream Android app Main Activity Started with [$ProfileName]")
 
             // Create handles on initial loading of the app
-            ip_addressView       = findViewById(getViewID(ProfileName,"serverIP_portInputView"))
-            connectionSwitchView = findViewById(getViewID(ProfileName,"switchConnect"))
-            reastreamLabelView   = findViewById(getViewID(ProfileName,"reastreamLabelInputView"))
+            ip_addressView       = findViewById(getViewID(ProfileName,"serverIP_portView"))
+            connectionSwitchView = findViewById(getViewID(ProfileName,"switchConnectReceiver"))
+            reastreamLabelView   = findViewById(getViewID(ProfileName,"reastreamReceiverFrameLabelView"))
             outputDeviceListView = findViewById(getViewID(ProfileName,"outputDeviceListView"))
             inputDeviceListView  = findViewById(getViewID(ProfileName,"inputDeviceListView"))
             controlWebView       = findViewById(getViewID(ProfileName,"webControlView"))
@@ -98,9 +97,9 @@ open class MainActivity : AppCompatActivity() {
             Log.i(TAG,msgPrefix+"ReaStream Android app Main Activity Started")
 
             // Create handles on initial loading of the app
-            ip_addressView       = findViewById(R.id.serverIP_portInputView)
-            connectionSwitchView = findViewById(R.id.switchConnect)
-            reastreamLabelView   = findViewById(R.id.reastreamLabelInputView)
+            ip_addressView       = findViewById(R.id.serverIP_portView)
+            connectionSwitchView = findViewById(R.id.switchConnectReceiver)
+            reastreamLabelView   = findViewById(R.id.reastreamReceiverFrameLabelView)
             outputDeviceListView = findViewById(R.id.outputDeviceListView)
             inputDeviceListView  = findViewById(R.id.inputDeviceListView)
             controlWebView       = findViewById(R.id.webControlView)

@@ -6,50 +6,69 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <!-- IP & Port to the Reaper Server-->
+    <!--  Control switch Receiver -->
+    <com.google.android.material.switchmaterial.SwitchMaterial
+        android:id="@+id/switchConnectReceiver_profile1"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="10dp"
+        android:checked="false"
+        android:minHeight="48dp"
+        android:onClick="onSwitchToggleCb"
+        android:text="@string/connectReceiverSwitchLabel"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toStartOf="@+id/serverIP_portView_profile1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="TouchTargetSizeCheck" />
+
+    <!-- IP & Port from/to the Reaper Server-->
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/serverIP_portInputView_profile1"
+        android:id="@+id/serverIP_portView_profile1"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginEnd="20dp"
-        app:layout_constraintEnd_toStartOf="@+id/switchConnect_profile1"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        android:layout_marginEnd="10dp"
+        app:layout_constraintBottom_toBottomOf="@+id/switchConnectReceiver_profile1"
+        app:layout_constraintEnd_toEndOf="@+id/switchConnectTransmitter_profile1"
+        app:layout_constraintStart_toEndOf="@+id/switchConnectReceiver_profile1"
+        app:layout_constraintTop_toTopOf="@+id/switchConnectReceiver_profile1">
 
         <com.google.android.material.textfield.TextInputEditText
             android:layout_width="match_parent"
             android:layout_height="35dp"
             android:hint="@string/server_ip_port"
             android:inputType="textUri"
-            android:text="0.0.0.0"
+            android:text="@string/server_ip_port_initialText"
+            android:textColor="#757575"
             android:textSize="20sp"
             tools:ignore="TouchTargetSizeCheck" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <!--  Control switch  -->
-    <Switch
-        android:id="@+id/switchConnect_profile1"
+    <!--  Control switch Transmitter -->
+    <com.google.android.material.switchmaterial.SwitchMaterial
+        android:id="@+id/switchConnectTransmitter_profile1"
         android:layout_width="wrap_content"
         android:layout_height="0dp"
-        android:layout_marginStart="5dp"
-        android:layout_marginEnd="20dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
         android:checked="false"
         android:minHeight="48dp"
-        android:onClick="onSwitchToggleCb"
-        android:text="@string/connectLabel"
+        android:text="@string/connectTransmitterSwitchLabel"
+        android:textColor="#757575"
         android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="@+id/serverIP_portInputView_profile1"
+        app:layout_constraintBottom_toBottomOf="@+id/serverIP_portView_profile1"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/serverIP_portInputView_profile1"
-        app:layout_constraintTop_toTopOf="@+id/serverIP_portInputView_profile1"
-        tools:ignore="TouchTargetSizeCheck,UseSwitchCompatOrMaterialXml" />
+        app:layout_constraintStart_toEndOf="@+id/serverIP_portView_profile1"
+        app:layout_constraintTop_toTopOf="@+id/serverIP_portView_profile1"
+        tools:ignore="TouchTargetSizeCheck" />
 
 
-    <!--  Reastream label  -->
+    <!--  Reastream label Receiver -->
     <EditText
-        android:id="@+id/reastreamLabelInputView_profile1"
+        android:id="@+id/reastreamReceiverFrameLabelView_profile1"
         android:layout_width="0dp"
         android:layout_height="54dp"
         android:layout_marginTop="10dp"
@@ -60,12 +79,12 @@
         android:minHeight="48dp"
         android:onClick="onReaStreamLabelChangeCb"
         android:text="@string/reastream_identifier_label"
-        app:layout_constraintEnd_toEndOf="@+id/switchConnect_profile1"
+        app:layout_constraintEnd_toEndOf="@+id/switchConnectTransmitter_profile1"
         app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="@+id/serverIP_portInputView_profile1"
-        app:layout_constraintTop_toBottomOf="@+id/serverIP_portInputView_profile1" />
+        app:layout_constraintStart_toStartOf="@+id/switchConnectReceiver_profile1"
+        app:layout_constraintTop_toBottomOf="@+id/serverIP_portView_profile1" />
 
-
+    <!-- Selection of output device-->
     <Spinner
         android:id="@+id/outputDeviceListView_profile1"
         android:layout_width="0dp"
@@ -74,9 +93,10 @@
         android:layout_marginEnd="5dp"
         android:contentDescription="@string/outputDeviceListView_Default"
         app:layout_constraintEnd_toStartOf="@+id/inputDeviceListView_profile1"
-        app:layout_constraintStart_toStartOf="@+id/reastreamLabelInputView_profile1"
-        app:layout_constraintTop_toBottomOf="@+id/reastreamLabelInputView_profile1" />
+        app:layout_constraintStart_toStartOf="@+id/reastreamReceiverFrameLabelView_profile1"
+        app:layout_constraintTop_toBottomOf="@+id/reastreamReceiverFrameLabelView_profile1" />
 
+    <!-- Selection of input device-->
     <Spinner
         android:id="@+id/inputDeviceListView_profile1"
         android:layout_width="0dp"
@@ -84,7 +104,7 @@
         android:layout_marginStart="5dp"
         android:contentDescription="@string/inputDeviceListView_Default"
         app:layout_constraintBottom_toBottomOf="@+id/outputDeviceListView_profile1"
-        app:layout_constraintEnd_toEndOf="@+id/reastreamLabelInputView_profile1"
+        app:layout_constraintEnd_toEndOf="@+id/reastreamReceiverFrameLabelView_profile1"
         app:layout_constraintStart_toEndOf="@+id/outputDeviceListView_profile1"
         app:layout_constraintTop_toTopOf="@+id/outputDeviceListView_profile1" />
 
@@ -101,15 +121,16 @@
         android:minHeight="48dp"
         android:onClick="onControlURLChangeCb"
         android:text="@string/control_url"
-        app:layout_constraintEnd_toEndOf="@+id/switchConnect_profile1"
+        app:layout_constraintStart_toStartOf="@+id/switchConnectReceiver_profile1"
+        app:layout_constraintEnd_toEndOf="@+id/switchConnectTransmitter_profile1"
         app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="@+id/serverIP_portInputView_profile1"
         app:layout_constraintTop_toBottomOf="@+id/outputDeviceListView_profile1" />
 
     <WebView
         android:id="@+id/webControlView_profile1"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_marginTop="10dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

@@ -40,7 +40,7 @@ open class UDP_receiver(UI_handle : MainActivity): Runnable, MainActivity() {
         // Audio output initialization as a separate process
 //        startAudioProcessThread()
         //TODO test via simple run
-        val audioOutput : audioPlaybackProcess = audioPlaybackProcess_test()
+        val audioOutput : AudioPlaybackProcess = AudioPlaybackProcess()
 
         // Retry to open the socket
         val maxRetryCount = 100
@@ -50,7 +50,7 @@ open class UDP_receiver(UI_handle : MainActivity): Runnable, MainActivity() {
         while (retryCount > 0 && UI.getIsConnectionSwitchStateON()){
              try {
                 //Keep a socket open to listen to all the UDP trafic that is destined for this port
-                socket = DatagramSocket_fromFileTest(ConnectionProperties.port,UI)//, InetAddress.getByName(ConnectionProperties.hostIP)
+                socket = DatagramSocket(ConnectionProperties.port)//, InetAddress.getByName(ConnectionProperties.hostIP)
                 socket.broadcast = true// TODO check if the broadcast is needed to get from all IPs on this port
 
                 // First packet used for setup of the audio device
@@ -133,7 +133,7 @@ open class UDP_receiver(UI_handle : MainActivity): Runnable, MainActivity() {
     private fun startAudioProcessThread() {
         // todo add a listener check if the thread has already been initialized
         Log.i(TAG,msgPrefix+"Create Audio Playback Process receiver.")
-        AudioPlaybackProcessThreadWithRunnable = Thread(audioPlaybackProcess())
+        AudioPlaybackProcessThreadWithRunnable = Thread(AudioPlaybackProcess())
         Log.i(TAG,msgPrefix+"Start Audio Playback Process in separate thread.")
         AudioPlaybackProcessThreadWithRunnable.start()
     }

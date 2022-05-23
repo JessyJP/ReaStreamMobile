@@ -6,7 +6,7 @@ import android.media.AudioManager
 import android.media.AudioTrack
 import android.util.Log
 
-open class audioPlaybackProcess : Runnable {
+open class AudioPlaybackProcess : Runnable {
     val msgPrefix = "Audio Playback:"
     private var UDP_receiverConnected : Boolean = false
 
