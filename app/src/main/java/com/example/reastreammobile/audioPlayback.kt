@@ -11,8 +11,8 @@ open class audioPlaybackProcess : Runnable {
     private var UDP_receiverConnected : Boolean = false
 
     private var propertiesSet_FLAG :Boolean = false
-    private var sampleRateHz : Int = 48000
-    private var numberAudioChannels : Int = 2
+    internal var sampleRateHz : Int = 48000
+    internal var numberAudioChannels : Int = 2
 
     private var playbackDelay = 0
 
@@ -51,14 +51,14 @@ open class audioPlaybackProcess : Runnable {
         Log.d(TAG,msgPrefix+" setAudioPlaybackProperties [$sampleRateHz]Hz Ch[$numberAudioChannels]")
     }
 
-    private fun audioChanelConfig(numAudioChIn:Int): Int  =  when (numAudioChIn) {
+    internal fun audioChanelConfig(numAudioChIn:Int): Int  =  when (numAudioChIn) {
         1 -> AudioFormat.CHANNEL_OUT_MONO
         2 -> AudioFormat.CHANNEL_OUT_STEREO
         else -> {AudioFormat.CHANNEL_OUT_STEREO}
     }
 
 
-    fun initializeOutputStream() {
+    open fun initializeOutputStream() {
 //        var audioMode =
         var audioEncoding: Int = AudioFormat.ENCODING_PCM_FLOAT
         // Set and push to audio track..

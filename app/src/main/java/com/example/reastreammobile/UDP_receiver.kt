@@ -40,7 +40,7 @@ open class UDP_receiver(UI_handle : MainActivity): Runnable, MainActivity() {
         // Audio output initialization as a separate process
 //        startAudioProcessThread()
         //TODO test via simple run
-        val audioOutput : audioPlaybackProcess = audioPlaybackProcess()
+        val audioOutput : audioPlaybackProcess = audioPlaybackProcess_test()
 
         // Retry to open the socket
         val maxRetryCount = 100

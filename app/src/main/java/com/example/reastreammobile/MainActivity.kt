@@ -24,7 +24,7 @@ import com.google.android.material.textfield.TextInputLayout
 // Debugging tags
 const val TAG    = "ReaStreamMobile"
 const val sepTxt = "============================================="
-const val DEBUG=false
+const val DEBUG=true
 val UI_PROFILES = arrayOf("activity_main", "profile1")
 
 open class MainActivity : AppCompatActivity() {
