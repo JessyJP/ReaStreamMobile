@@ -8,16 +8,26 @@ import java.nio.charset.StandardCharsets
 
 // connection properties
 // Todo this will eventually have to be moved to more appropriate location and the IP (and just in case probably the port number ) has to be extracted from the UI
-class ReaperHostAddress {
-    var hostIP: String = "192.168.0.100"
-    var port: Int = 58710
+class NetworkConnectionPropertiesToReaper {
+    var port: Int           = 58710
+    var hostIP: String      = "192.168.0.100"
+
+    var localHost           = "127.0.0.1" //The  physical/emulated device loopback interface
+
+    var emulatedGateway     = "10.0.2.1" //Router/gateway address
+    var emulatedPClocalhost = "10.0.2.2" // Special alias to your host loopback interface (i.e., 127.0.0.1 on your development machine)
+    var emulatedDNS         = "10.0.2.3" //	First DNS server
+    //"10.0.2.4" / "10.0.2.5" / "10.0.2.6" 	Optional second, third and fourth DNS server (if any)
+    var emulatedInterface   = "10.0.2.15" // The emulated device network/ethernet interface
+
+    var emulatedLanIP       = "10.0.2.16"
 
     constructor()
-    init{}
+//    init{hostIP=localHost}
 }
 
 // Global connection properties initialization
-val ConnectionProperties = ReaperHostAddress()
+val ConnectionProperties = NetworkConnectionPropertiesToReaper()
 
 open class UDP_receiver(UI_handle : MainActivity): Runnable, MainActivity() {
     val UI : MainActivity = UI_handle
@@ -27,6 +37,8 @@ open class UDP_receiver(UI_handle : MainActivity): Runnable, MainActivity() {
     protected val msgPrefix = "UDP Receiver:"
 
     lateinit var  AudioPlaybackProcessThreadWithRunnable : Thread
+    var socket_out: DatagramSocket? = null
+    var socketTimeout: Int = 2*1000// set the timeout in milliseconds.
 
     override fun run() {
         // Thread callback message ID
@@ -43,15 +55,17 @@ open class UDP_receiver(UI_handle : MainActivity): Runnable, MainActivity() {
         val audioOutput : AudioPlaybackProcess = AudioPlaybackProcess()
 
         // Retry to open the socket
-        val maxRetryCount = 100
+        val maxRetryCount = 10
         var retryCount = maxRetryCount
 
         // Inside the loop is the effective receive UDP packet callback
         while (retryCount > 0 && UI.getIsConnectionSwitchStateON()){
-             try {
+            try {
                 //Keep a socket open to listen to all the UDP trafic that is destined for this port
                 socket = DatagramSocket(ConnectionProperties.port)//, InetAddress.getByName(ConnectionProperties.hostIP)
                 socket.broadcast = true// TODO check if the broadcast is needed to get from all IPs on this port
+                socket.soTimeout = socketTimeout
+                socket_out = socket
 
                 // First packet used for setup of the audio device
                 val firstPacket = DatagramPacket(buffer, buffer.size)
@@ -124,6 +138,13 @@ open class UDP_receiver(UI_handle : MainActivity): Runnable, MainActivity() {
             }
         }
         Log.v(TAG,"${Thread.currentThread()}  $msgPrefix Thread Stopped")
+    }
+
+    override fun onDestroy(){
+        // Just in case close this
+        socket_out?.close()
+        super.onDestroy()
+
     }
 
     fun isReaStreamFrame(packet : DatagramPacket) : Boolean {
