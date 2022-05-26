@@ -1,6 +1,5 @@
 package com.example.reastreammobile
 
-import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioManager
 import android.media.AudioTrack
@@ -11,7 +10,7 @@ open class AudioPlaybackProcess : Runnable {
     private var UDP_receiverConnected : Boolean = false
 
     private var propertiesSet_FLAG :Boolean = false
-    internal var sampleRateHz : Int = 48000
+    internal var samplingRateHz : Int = 48000
     internal var numberAudioChannels : Int = 2
 
     private var playbackDelay = 0
@@ -22,6 +21,7 @@ open class AudioPlaybackProcess : Runnable {
     var byteData : ByteArray = ByteArray(0)
 
     override fun run() {
+        // TODO maybe remove this if it is not used as separate thread
         Log.i(TAG,"${Thread.currentThread()} $msgPrefix Thread Started")
         // wait
         while(!propertiesSet_FLAG)
@@ -43,12 +43,12 @@ open class AudioPlaybackProcess : Runnable {
     }
 
     fun setAudioPlaybackProperties(frame: ReastreamFrame){
-        sampleRateHz = frame.audioSampleRate
+        samplingRateHz = frame.audioSampleRate
         numberAudioChannels = frame.numAudioChannels
         // If the audio properties have been set
         UDP_receiverConnected = true
         propertiesSet_FLAG = true
-        Log.d(TAG,msgPrefix+" setAudioPlaybackProperties [$sampleRateHz]Hz Ch[$numberAudioChannels]")
+        Log.d(TAG,msgPrefix+" setAudioPlaybackProperties [$samplingRateHz]Hz Ch[$numberAudioChannels]")
     }
 
     internal fun audioChanelConfig(numAudioChIn:Int): Int  =  when (numAudioChIn) {
@@ -63,32 +63,34 @@ open class AudioPlaybackProcess : Runnable {
         var audioEncoding: Int = AudioFormat.ENCODING_PCM_FLOAT
         // Set and push to audio track..
         var minAudioBufferSize: Int = AudioTrack.getMinBufferSize(
-            sampleRateHz,
+            samplingRateHz,
             audioChanelConfig(numberAudioChannels),
             audioEncoding
         )
+        minAudioBufferSize = 1200*10
 
+        // TODO the buffer needs to be adjust and only one method for selection needs to be used
         OutputStream = AudioTrack(
-            AudioManager.STREAM_MUSIC, sampleRateHz, audioChanelConfig(numberAudioChannels),
-            audioEncoding, minAudioBufferSize, AudioTrack.MODE_STREAM
+            AudioManager.STREAM_MUSIC, samplingRateHz, audioChanelConfig(numberAudioChannels),
+            audioEncoding, minAudioBufferSize, AudioTrack.PERFORMANCE_MODE_LOW_LATENCY
         )
 
-        OutputStream = AudioTrack.Builder()
-            .setAudioAttributes(
-                AudioAttributes.Builder()
-//                    .setUsage(AudioAttributes.USAGE_ALARM)
-                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                    .build()
-            )
-            .setAudioFormat(
-                AudioFormat.Builder()
-                    .setEncoding(audioEncoding)
-                    .setSampleRate(sampleRateHz)
-                    .setChannelMask(audioChanelConfig(numberAudioChannels))
-                    .build()
-            )
-            .setBufferSizeInBytes(minAudioBufferSize)
-            .build()
+//        OutputStream = AudioTrack.Builder()
+//            .setAudioAttributes(
+//                AudioAttributes.Builder()
+////                    .setUsage(AudioAttributes.USAGE_ALARM)
+//                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+//                    .build()
+//            )
+//            .setAudioFormat(
+//                AudioFormat.Builder()
+//                    .setEncoding(audioEncoding)
+//                    .setSampleRate(samplingRateHz)
+//                    .setChannelMask(audioChanelConfig(numberAudioChannels))
+//                    .build()
+//            )
+//            .setBufferSizeInBytes(minAudioBufferSize)
+//            .build()
 
         //TODO change the if statements to TRY CATCH blocks
         if (OutputStream != null) {
@@ -97,6 +99,13 @@ open class AudioPlaybackProcess : Runnable {
     }
 
     open fun playAudioBuffer(F: ReastreamFrame) {
+        // Check the channels and reinitialize if there is change in the channel data
+        if (numberAudioChannels != F.numAudioChannels){
+            closeOutputStream()
+            setAudioPlaybackProperties(F)
+            initializeOutputStream()
+        }
+
         F.audioSample = audioBufferReorder(F)// TODO reorder frame may be needed
         if (OutputStream != null) {
             // Write the byte array to the track

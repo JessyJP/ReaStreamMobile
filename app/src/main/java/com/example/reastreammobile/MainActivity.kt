@@ -20,12 +20,15 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.google.android.material.textfield.TextInputLayout
+import java.net.DatagramSocket
+import java.net.InetSocketAddress
+import kotlin.random.Random
 
 
 // Debugging tags
 const val TAG    = "ReaStreamMobile"
 const val sepTxt = "============================================="
-const val DEBUG=true
+const val DEBUG=false
 val UI_PROFILES = arrayOf("activity_main", "profile1")
 
 open class MainActivity : AppCompatActivity() {
@@ -210,11 +213,13 @@ open class MainActivity : AppCompatActivity() {
     }
 
     private fun startUDPlistnerProcessThread() {
-        // todo add a listener check if the thread has already been initialized and close it first
+        // The variable is reinitialized on every call "udpReceiverProcessThreadWithRunnable"
+        // TODO: maybe the variable "udpReceiverProcessThreadWithRunnable" is unnecessary
         Log.i(TAG,msgPrefix+"Create UDP receiver process.")
         udpReceiverProcessThreadWithRunnable = Thread(UDP_receiver(this))
         Log.i(TAG,msgPrefix+"Start UDP receiver process in separate thread.")
         udpReceiverProcessThreadWithRunnable.start()
+        // TODO a handler is needed to ensure the Switch is returned to off position once the Thread finishes
     }
 
     //***+++ Get & Set Methods +++***//
@@ -228,21 +233,19 @@ open class MainActivity : AppCompatActivity() {
         return receiverSwitchView.isChecked
     }
 
-    internal fun setReceiverConnectionSwitchState(state: Boolean){
-//        receiverSwitchView.check
-        //todo finish this function
-        if (state){}
-        else
-        {
+    fun getIsTransmitterSwitchStateON(): Boolean{
+        return transmitterSwitchView.isChecked
+    }
 
-            Log.d(TAG, "$msgPrefix The receiver connection switch state is reset.")
-        }
+    internal fun setReceiverConnectionSwitchState(state: Boolean){
+        receiverSwitchView.isChecked = state
+        Log.d(TAG, "$msgPrefix (auto) set Receiver Connection Switch State = $state.")
     }
 
     //***+++ Callback functions section +++***//
 
     // Connection callback function
-    fun onSwitchToggleCb(view: View) {
+    fun onReceiverSwitchToggleCb(view: View) {
         // Based on the switch position
         if (receiverSwitchView.isChecked){
 
@@ -253,7 +256,7 @@ open class MainActivity : AppCompatActivity() {
                 params.topToBottom = ip_addressView.id
 //                params.topMargin = 10
                   controlWebView.requestLayout()
-            Log.d(TAG, "$msgPrefix Switch to connected view layout/constraint")
+            Log.d(TAG, "$msgPrefix Switch web control view to layout/constraint for expanded state")
 
         }
         else {
@@ -262,6 +265,10 @@ open class MainActivity : AppCompatActivity() {
             controlWebView.requestLayout()
             Log.d(TAG, "$msgPrefix Switch to disconnected view layout/constraint")
         }
+    }
+
+    fun onTransmitterSwitchToggleCb(view: View){
+        udpTest()
     }
 
     fun onControlURLChangeCb(view: View) {
@@ -302,7 +309,27 @@ open class MainActivity : AppCompatActivity() {
     //***+++ UDP connection functions  +++***//
 
 
+    fun udpTest(){
 
+        for (i4 in 0 until 256) {
+            var ipStr: String = "192.168.0.$i4"
+            val s = DatagramSocket(null)
+            try {
+//                val address = InetSocketAddress(ConnectionProperties.localHost, 30345)
+
+                s.bind(InetSocketAddress(ipStr, Random.nextInt(10000, 65536)))
+                Thread.sleep(10)
+                Log.d(TAG, "$msgPrefix\n---------\n Try: ${ipStr}")
+                Log.d(TAG, msgPrefix + "SUCCESS  BIND!!! to ${s.localAddress}:"+s.localPort)
+//                println(TAG + msgPrefix + "SUCCESS!!!! BIND!!! to ${s.localAddress}")
+                s.close()
+            } catch (e: Exception) {
+                e.printStackTrace()
+                s.close()
+//                Log.d(TAG, msgPrefix + "ERROR BIND!!! to ${s.localAddress}")
+            }
+        }
+    }
 
 
 }

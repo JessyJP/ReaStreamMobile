@@ -4,13 +4,15 @@ import android.os.SystemClock.sleep
 import android.util.Log
 import java.net.DatagramPacket
 import java.net.DatagramSocket
+import java.net.InetAddress
 import java.nio.charset.StandardCharsets
 
 // connection properties
 // Todo this will eventually have to be moved to more appropriate location and the IP (and just in case probably the port number ) has to be extracted from the UI
 class NetworkConnectionPropertiesToReaper {
     var port: Int           = 58710
-    var hostIP: String      = "192.168.0.100"
+    var hostIP: String      = "192.168.0.227"
+    var deviceIP: String    = "192.168.0.120"
 
     var localHost           = "127.0.0.1" //The  physical/emulated device loopback interface
 
@@ -21,15 +23,18 @@ class NetworkConnectionPropertiesToReaper {
     var emulatedInterface   = "10.0.2.15" // The emulated device network/ethernet interface
 
     var emulatedLanIP       = "10.0.2.16"
+    var anyIP               = "0.0.0.0"//
+    var allInt              = "255.255.255.255"
 
+    var IP : String
     constructor()
-//    init{hostIP=localHost}
+    init{IP = anyIP}
 }
 
 // Global connection properties initialization
 val ConnectionProperties = NetworkConnectionPropertiesToReaper()
 
-open class UDP_receiver(UI_handle : MainActivity): Runnable, MainActivity() {
+open class UDP_receiver(UI_handle : MainActivity): Runnable {// TODO: is ", MainActivity()" inheritance needed here?
     val UI : MainActivity = UI_handle
     var ListenReaStreamLabel : String = UI_handle.getReastreamLabel()
     var audioOutputReady : Boolean  = false
@@ -37,12 +42,11 @@ open class UDP_receiver(UI_handle : MainActivity): Runnable, MainActivity() {
     protected val msgPrefix = "UDP Receiver:"
 
     lateinit var  AudioPlaybackProcessThreadWithRunnable : Thread
-    var socket_out: DatagramSocket? = null
     var socketTimeout: Int = 2*1000// set the timeout in milliseconds.
 
     override fun run() {
         // Thread callback message ID
-        Log.i(TAG,"${Thread.currentThread()} $msgPrefix Thread Started")
+        Log.i(TAG,"${Thread.currentThread()} $msgPrefix Thread run() Started")
 
         // Define all the variables and classes
         var socket: DatagramSocket? = null
@@ -61,11 +65,15 @@ open class UDP_receiver(UI_handle : MainActivity): Runnable, MainActivity() {
         // Inside the loop is the effective receive UDP packet callback
         while (retryCount > 0 && UI.getIsReceiverSwitchStateON()){
             try {
+                Log.d(TAG, msgPrefix + "Attempt to bind socket to [${ConnectionProperties.IP}:${ConnectionProperties.port}] with [$socketTimeout]timeout")
                 //Keep a socket open to listen to all the UDP trafic that is destined for this port
-                socket = DatagramSocket(ConnectionProperties.port)//, InetAddress.getByName(ConnectionProperties.hostIP)
+                socket = DatagramSocket(
+                    ConnectionProperties.port,
+                    InetAddress.getByName(ConnectionProperties.IP)
+                )//TODO: remove or keep: InetAddress.getByName(ConnectionProperties.hostIP)
                 socket.broadcast = true// TODO check if the broadcast is needed to get from all IPs on this port
                 socket.soTimeout = socketTimeout
-                socket_out = socket
+                Log.d(TAG, msgPrefix + "Socket bound to [${socket.localAddress}:${socket.localPort}] with [$socketTimeout]timeout")
 
                 // First packet used for setup of the audio device
                 val firstPacket = DatagramPacket(buffer, buffer.size)
@@ -137,15 +145,8 @@ open class UDP_receiver(UI_handle : MainActivity): Runnable, MainActivity() {
                 sleep(100)
             }
         }
-        Log.v(TAG,"${Thread.currentThread()}  $msgPrefix Thread Stopped")// Todo is it really stopped or just he run function has finisheed
-    }
-
-    override fun onDestroy(){
-        // Just in case close this
-        socket_out?.close()// propbably unnecessary because there is time out// todo maybe remove "socket out later
-        UI.setReceiverConnectionSwitchState(false)
-        super.onDestroy()
-
+        Log.v(TAG,"${Thread.currentThread()}  $msgPrefix Thread run() Stopped")// Todo is it really stopped or just he run function has finisheed
+        // TODO where should this be placed : for now just call this at the end of the loop
     }
 
     fun isReaStreamFrame(packet : DatagramPacket) : Boolean {
