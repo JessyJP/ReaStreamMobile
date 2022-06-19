@@ -106,7 +106,7 @@ open class AudioPlaybackProcess : Runnable {
             initializeOutputStream()
         }
 
-        F.audioSample = audioBufferReorder(F)// TODO reorder frame may be needed
+//        F.audioSample = F.audioBufferReorder()// TODO reorder frame may be needed
         if (OutputStream != null) {
             // Write the byte array to the track
             OutputStream.write(
@@ -118,20 +118,6 @@ open class AudioPlaybackProcess : Runnable {
             if(DEBUG)Log.d(TAG,msgPrefix+" Play ${F.sampleByteSize} bytes as ${F.numSamples}")
 
         } else Log.d(TAG, "$msgPrefix audio track stopped in loop ")
-    }
-
-    fun audioBufferReorder(F: ReastreamFrame): FloatArray{
-        var buffer = FloatArray(F.audioSample.size)
-        var chSampLen = F.audioSample.size / F.numAudioChannels
-        for (ch in 0 until F.numAudioChannels) {
-            for (s in 0 until chSampLen) {
-                buffer[s*F.numAudioChannels+ch] = F.audioSample[s+ch*chSampLen]
-            }
-        }
-
-//        // Trim
-//        buffer = F.audioSample.take(chSampLen).toFloatArray()
-        return buffer
     }
 
     fun closeOutputStream() {

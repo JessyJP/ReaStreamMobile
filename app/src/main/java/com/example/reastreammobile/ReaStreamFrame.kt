@@ -103,4 +103,18 @@ class ReastreamFrame {
     override fun toString(): String {
         return "lbl[$ReaStreamLabel] ch[$numAudioChannels] smpR[$audioSampleRate]Hz SML:${numSamples} of data[${audioSample[0]},...]"
     }
+
+    fun audioBufferReorder(): FloatArray{
+        var buffer = FloatArray(audioSample.size)
+        var chSampLen = audioSample.size / numAudioChannels
+        for (ch in 0 until numAudioChannels) {
+            for (s in 0 until chSampLen) {
+                buffer[s*numAudioChannels+ch] = audioSample[s+ch*chSampLen]
+            }
+        }
+
+//        // Trim
+//        buffer = F.audioSample.take(chSampLen).toFloatArray()
+        return buffer
+    }
 }
