@@ -5,9 +5,7 @@ package com.example.reastreammobile
 // Audio Devices
 //import android.util.Log
 
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
+import android.annotation.SuppressLint
 import android.media.AudioManager
 import android.os.Build
 import android.os.Bundle
@@ -20,9 +18,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.google.android.material.textfield.TextInputLayout
-import java.net.DatagramSocket
-import java.net.InetSocketAddress
-import kotlin.random.Random
 
 
 // Debugging tags
@@ -48,9 +43,6 @@ open class MainActivity : AppCompatActivity() {
     private lateinit var controlURLView: TextView
     private lateinit var controlWebView: WebView
 
-
-    // Thread
-    private lateinit var  udpReceiverProcessThreadWithRunnable : Thread
 
     //***+++ Override methods +++***//
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -116,6 +108,7 @@ open class MainActivity : AppCompatActivity() {
     }
 
     // Pre connection setup
+    @SuppressLint("SetJavaScriptEnabled")// Todo: check if there are any problems with enabling JS
     private fun preConnectionSetup() {
         Log.i(TAG,msgPrefix+"Do pre connection setup")
         // Enable javaScript
@@ -213,12 +206,16 @@ open class MainActivity : AppCompatActivity() {
     }
 
     private fun startUDPlistnerProcessThread() {
-        // The variable is reinitialized on every call "udpReceiverProcessThreadWithRunnable"
-        // TODO: maybe the variable "udpReceiverProcessThreadWithRunnable" is unnecessary
         Log.i(TAG,msgPrefix+"Create UDP receiver process.")
-        udpReceiverProcessThreadWithRunnable = Thread(UDP_receiver(this))
+        Thread(UDP_receiver(this)).start()
         Log.i(TAG,msgPrefix+"Start UDP receiver process in separate thread.")
-        udpReceiverProcessThreadWithRunnable.start()
+        // TODO a handler is needed to ensure the Switch is returned to off position once the Thread finishes
+    }
+
+    private fun startUDPtransmitterProcessThread() {
+        Log.i(TAG,msgPrefix+"Create UDP transmitter process.")
+        Thread(AudioRecorder(this)).start()
+        Log.i(TAG,msgPrefix+"Start UDP receiver process in separate thread.")
         // TODO a handler is needed to ensure the Switch is returned to off position once the Thread finishes
     }
 
@@ -240,6 +237,7 @@ open class MainActivity : AppCompatActivity() {
     internal fun setReceiverConnectionSwitchState(state: Boolean){
         receiverSwitchView.isChecked = state
         Log.d(TAG, "$msgPrefix (auto) set Receiver Connection Switch State = $state.")
+        //Todo: this function might not be used/useful
     }
 
     //***+++ Callback functions section +++***//
@@ -268,7 +266,25 @@ open class MainActivity : AppCompatActivity() {
     }
 
     fun onTransmitterSwitchToggleCb(view: View){
-        udpTest()
+        // Based on the switch position
+        if (transmitterSwitchView.isChecked){
+
+            // Create the UDP transmitter
+            startUDPtransmitterProcessThread()
+
+            val params = controlWebView.layoutParams as ConstraintLayout.LayoutParams
+            params.topToBottom = ip_addressView.id
+//                params.topMargin = 10
+            controlWebView.requestLayout()
+            Log.d(TAG, "$msgPrefix Switch web control view to layout/constraint for expanded state")
+        }
+        else {
+            val params = controlWebView.layoutParams as ConstraintLayout.LayoutParams
+            params.topToBottom = controlURLView.id
+            controlWebView.requestLayout()
+            Log.d(TAG, "$msgPrefix Switch to disconnected view layout/constraint")
+        }
+
     }
 
     fun onControlURLChangeCb(view: View) {
@@ -309,27 +325,27 @@ open class MainActivity : AppCompatActivity() {
     //***+++ UDP connection functions  +++***//
 
 
-    fun udpTest(){
-
-        for (i4 in 0 until 256) {
-            var ipStr: String = "192.168.0.$i4"
-            val s = DatagramSocket(null)
-            try {
-//                val address = InetSocketAddress(ConnectionProperties.localHost, 30345)
-
-                s.bind(InetSocketAddress(ipStr, Random.nextInt(10000, 65536)))
-                Thread.sleep(10)
-                Log.d(TAG, "$msgPrefix\n---------\n Try: ${ipStr}")
-                Log.d(TAG, msgPrefix + "SUCCESS  BIND!!! to ${s.localAddress}:"+s.localPort)
-//                println(TAG + msgPrefix + "SUCCESS!!!! BIND!!! to ${s.localAddress}")
-                s.close()
-            } catch (e: Exception) {
-                e.printStackTrace()
-                s.close()
-//                Log.d(TAG, msgPrefix + "ERROR BIND!!! to ${s.localAddress}")
-            }
-        }
-    }
+//    fun udpTest(){
+//
+//        for (i4 in 0 until 256) {
+//            var ipStr: String = "192.168.0.$i4"
+//            val s = DatagramSocket(null)
+//            try {
+////                val address = InetSocketAddress(ConnectionProperties.localHost, 30345)
+//
+//                s.bind(InetSocketAddress(ipStr, Random.nextInt(10000, 65536)))
+//                Thread.sleep(10)
+//                Log.d(TAG, "$msgPrefix\n---------\n Try: ${ipStr}")
+//                Log.d(TAG, msgPrefix + "SUCCESS  BIND!!! to ${s.localAddress}:"+s.localPort)
+////                println(TAG + msgPrefix + "SUCCESS!!!! BIND!!! to ${s.localAddress}")
+//                s.close()
+//            } catch (e: Exception) {
+//                e.printStackTrace()
+//                s.close()
+////                Log.d(TAG, msgPrefix + "ERROR BIND!!! to ${s.localAddress}")
+//            }
+//        }
+//    }
 
 
 }
@@ -337,69 +353,69 @@ open class MainActivity : AppCompatActivity() {
 
 //////////////////////////////////////////////+++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-class BluetoothReceiver : BroadcastReceiver() {
-    private var localAudioManager: AudioManager? = null
-    override fun onReceive(context: Context, intent: Intent) {
-        Log.i(TAG, "onReceive - BluetoothBroadcast")
-        localAudioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager?
-        val action = intent.action
-        if (action == ACTION_BT_HEADSET_STATE_CHANGED) {
-            val extraData = intent.getIntExtra(EXTRA_STATE, STATE_DISCONNECTED)
-            if (extraData == STATE_DISCONNECTED) {
-                //no headset -> going other modes
-                localAudioManager!!.isBluetoothScoOn = false
-                localAudioManager!!.stopBluetoothSco()
-                localAudioManager!!.mode = AudioManager.MODE_NORMAL
-                Log.i(TAG, "Bluetooth Headset Off " + localAudioManager!!.mode)
-                Log.i(
-                    TAG,
-                    "A2DP: " + localAudioManager!!.isBluetoothA2dpOn + ". SCO: " + localAudioManager!!.isBluetoothScoAvailableOffCall
-                )
-            } else {
-                localAudioManager!!.mode = AudioManager.MODE_CALL_SCREENING
-                localAudioManager!!.isBluetoothScoOn = true
-                localAudioManager!!.startBluetoothSco()
-                localAudioManager!!.mode = AudioManager.MODE_IN_CALL
-                Log.i(TAG, "Bluetooth Headset On " + localAudioManager!!.mode)
-                Log.i(
-                    TAG,
-                    "A2DP: " + localAudioManager!!.isBluetoothA2dpOn + ". SCO: " + localAudioManager!!.isBluetoothScoAvailableOffCall
-                )
-            }
-        }
-        if (action == ACTION_BT_HEADSET_FORCE_ON) {
-            localAudioManager!!.mode = AudioManager.MODE_CALL_SCREENING
-            localAudioManager!!.isBluetoothScoOn = true
-            localAudioManager!!.startBluetoothSco()
-            localAudioManager!!.mode = AudioManager.MODE_IN_CALL
-            Log.i(TAG, "Bluetooth Headset On " + localAudioManager!!.mode)
-            Log.i(
-                TAG,
-                "A2DP: " + localAudioManager!!.isBluetoothA2dpOn + ". SCO: " + localAudioManager!!.isBluetoothScoAvailableOffCall
-            )
-        }
-        if (action == ACTION_BT_HEADSET_FORCE_OFF) {
-            localAudioManager!!.isBluetoothScoOn = false
-            localAudioManager!!.stopBluetoothSco()
-            localAudioManager!!.mode = AudioManager.MODE_NORMAL
-            Log.i(TAG, "Bluetooth Headset Off " + localAudioManager!!.mode)
-            Log.i(
-                TAG,
-                "A2DP: " + localAudioManager!!.isBluetoothA2dpOn + ". SCO: " + localAudioManager!!.isBluetoothScoAvailableOffCall
-            )
-        }
-    }
-
-    companion object {
-        private const val STATE_DISCONNECTED = 0x00000000
-        private const val EXTRA_STATE = "android.bluetooth.headset.extra.STATE"
-        private const val TAG = "BluetoothReceiver"
-        private const val ACTION_BT_HEADSET_STATE_CHANGED =
-            "android.bluetooth.headset.action.STATE_CHANGED"
-        private const val ACTION_BT_HEADSET_FORCE_ON = "android.bluetooth.headset.action.FORCE_ON"
-        private const val ACTION_BT_HEADSET_FORCE_OFF = "android.bluetooth.headset.action.FORCE_OFF"
-    }
-}
+//class BluetoothReceiver : BroadcastReceiver() {
+//    private var localAudioManager: AudioManager? = null
+//    override fun onReceive(context: Context, intent: Intent) {
+//        Log.i(TAG, "onReceive - BluetoothBroadcast")
+//        localAudioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager?
+//        val action = intent.action
+//        if (action == ACTION_BT_HEADSET_STATE_CHANGED) {
+//            val extraData = intent.getIntExtra(EXTRA_STATE, STATE_DISCONNECTED)
+//            if (extraData == STATE_DISCONNECTED) {
+//                //no headset -> going other modes
+//                localAudioManager!!.isBluetoothScoOn = false
+//                localAudioManager!!.stopBluetoothSco()
+//                localAudioManager!!.mode = AudioManager.MODE_NORMAL
+//                Log.i(TAG, "Bluetooth Headset Off " + localAudioManager!!.mode)
+//                Log.i(
+//                    TAG,
+//                    "A2DP: " + localAudioManager!!.isBluetoothA2dpOn + ". SCO: " + localAudioManager!!.isBluetoothScoAvailableOffCall
+//                )
+//            } else {
+//                localAudioManager!!.mode = AudioManager.MODE_CALL_SCREENING
+//                localAudioManager!!.isBluetoothScoOn = true
+//                localAudioManager!!.startBluetoothSco()
+//                localAudioManager!!.mode = AudioManager.MODE_IN_CALL
+//                Log.i(TAG, "Bluetooth Headset On " + localAudioManager!!.mode)
+//                Log.i(
+//                    TAG,
+//                    "A2DP: " + localAudioManager!!.isBluetoothA2dpOn + ". SCO: " + localAudioManager!!.isBluetoothScoAvailableOffCall
+//                )
+//            }
+//        }
+//        if (action == ACTION_BT_HEADSET_FORCE_ON) {
+//            localAudioManager!!.mode = AudioManager.MODE_CALL_SCREENING
+//            localAudioManager!!.isBluetoothScoOn = true
+//            localAudioManager!!.startBluetoothSco()
+//            localAudioManager!!.mode = AudioManager.MODE_IN_CALL
+//            Log.i(TAG, "Bluetooth Headset On " + localAudioManager!!.mode)
+//            Log.i(
+//                TAG,
+//                "A2DP: " + localAudioManager!!.isBluetoothA2dpOn + ". SCO: " + localAudioManager!!.isBluetoothScoAvailableOffCall
+//            )
+//        }
+//        if (action == ACTION_BT_HEADSET_FORCE_OFF) {
+//            localAudioManager!!.isBluetoothScoOn = false
+//            localAudioManager!!.stopBluetoothSco()
+//            localAudioManager!!.mode = AudioManager.MODE_NORMAL
+//            Log.i(TAG, "Bluetooth Headset Off " + localAudioManager!!.mode)
+//            Log.i(
+//                TAG,
+//                "A2DP: " + localAudioManager!!.isBluetoothA2dpOn + ". SCO: " + localAudioManager!!.isBluetoothScoAvailableOffCall
+//            )
+//        }
+//    }
+//
+//    companion object {
+//        private const val STATE_DISCONNECTED = 0x00000000
+//        private const val EXTRA_STATE = "android.bluetooth.headset.extra.STATE"
+//        private const val TAG = "BluetoothReceiver"
+//        private const val ACTION_BT_HEADSET_STATE_CHANGED =
+//            "android.bluetooth.headset.action.STATE_CHANGED"
+//        private const val ACTION_BT_HEADSET_FORCE_ON = "android.bluetooth.headset.action.FORCE_ON"
+//        private const val ACTION_BT_HEADSET_FORCE_OFF = "android.bluetooth.headset.action.FORCE_OFF"
+//    }
+//}
 
 //
 //Lines:
