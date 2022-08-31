@@ -18,16 +18,16 @@ class AudioRecorder(UI:MainActivity) : Runnable {
 
     lateinit var OutputStream: AudioRecord
     ////////////////
-    val SAMPLING_RATE: Int = 44100
+    val SAMPLING_RATE: Int = sampleRateHz
     val AUDIO_SOURCE = MediaRecorder.AudioSource.MIC
     val CHANNEL_IN_CONFIG: Int = AudioFormat.CHANNEL_IN_MONO
-    val AUDIO_FORMAT: Int = AudioFormat.ENCODING_PCM_16BIT
+    val AUDIO_FORMAT: Int = AudioFormat.ENCODING_PCM_FLOAT
     val BUFFER_SIZE = AudioRecord.getMinBufferSize(SAMPLING_RATE, CHANNEL_IN_CONFIG, AUDIO_FORMAT)
 
 
     //    BufferArray
     var byteData : ByteArray = ByteArray(0)
-    @SuppressLint("MissingPermission")// Todo
+//    @SuppressLint("MissingPermission")// Todo
     override fun run() {
         android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
         Log.d(TAG, "$msgPrefix [Starting recording]"); //TODO change this message
@@ -42,7 +42,8 @@ class AudioRecorder(UI:MainActivity) : Runnable {
             BUFFER_SIZE);
 
 
-        recorder.startRecording();
+
+        recorder?.startRecording()
 
         while (!true) {
 
